@@ -389,6 +389,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 <symbol id="i-compass" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M15 9l-2 4-4 2 2-4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M12 18a1 1 0 1 0 0 2 1 1 0 0 0 0-2z M8 14a6 6 0 0 1 8 0 M5 11a10 10 0 0 1 14 0 M2 8a14 14 0 0 1 20 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-database" viewBox="0 0 24 24"><path d="M4 6c0-2 4-3 8-3s8 1 8 3-4 3-8 3-8-1-8-3z M4 6v12c0 2 4 3 8 3s8-1 8-3V6 M4 12c0 2 4 3 8 3s8-1 8-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M9 15l6-6 M10.5 6.5l1.8-1.8a4.2 4.2 0 0 1 6 6l-2.4 2.4 M13.5 17.5l-1.8 1.8a4.2 4.2 0 0 1-6-6l2.4-2.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </defs>
 </svg>
 
@@ -434,7 +435,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
         </button>
         <button class="btn wide" onclick="downloadRecovery()"><svg class="ic"><use href="#i-download"/></svg> Tải .txt</button>
       </div>
-      <button class="btn pri wide" style="margin-top:10px;padding:12px" onclick="finishSetup()">
+      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+        <div class="lb" style="color:var(--accent)">🔑 MẬT KHẨU DÙNG CHUNG (mọi máy · mọi mạng)</div>
+        <div class="sub" style="font-size:.64rem">Gửi <b>link đồng bộ</b> cho máy khác. Máy đó mở link rồi nhập đúng mật khẩu vừa đặt — không cần đặt lại.</div>
+        <div class="rec"><b id="syncCode" style="font-size:.7rem;letter-spacing:.06em">——————</b></div>
+        <button class="btn wide" onclick="copyText(adminSyncLink(ADMIN.load() &amp;&amp; ADMIN.data.sync),'Đã copy link đồng bộ')">
+          <svg class="ic"><use href="#i-link"/></svg> Copy link đồng bộ
+        </button>
+        <div class="sub" style="margin-top:8px;font-size:.6rem">
+          Khoá chủ <b class="mono" style="color:var(--warn)">35879</b> luôn đăng nhập được ở bất kỳ bản copy nào, kể cả khi chưa đồng bộ.
+        </div>
+      </div>
+      <button class="btn pri wide" style="margin-top:14px;padding:12px" onclick="finishSetup()">
         <svg class="ic"><use href="#i-check"/></svg> Tôi đã lưu — vào dashboard
       </button>
     </div>
@@ -447,7 +459,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
     <div class="authcard">
       <div class="logo"><svg class="ic"><use href="#i-lock"/></svg></div>
       <h1>BioGalaxy Admin</h1>
-      <div class="sub">Nhập mật khẩu quản trị để tiếp tục.</div>
+      <div class="sub">Nhập <b>mật khẩu dùng chung</b> do quản trị đặt.<br>
+        <span style="font-size:.62rem;color:var(--text3)">Chưa đồng bộ máy này? Bấm "Máy mới — dán mã / link đồng bộ".</span></div>
       <div style="margin-top:16px">
         <input type="password" id="pwLogin" autocomplete="current-password" placeholder="Mật khẩu"
                onkeydown="if(event.key==='Enter')doLogin()">
@@ -456,6 +469,17 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
       <button class="btn pri wide" id="loginBtn" style="margin-top:12px;padding:12px" onclick="doLogin()">
         <svg class="ic"><use href="#i-right-to-bracket"/></svg> Đăng nhập
       </button>
+      <button class="btn wide" style="margin-top:7px" onclick="showSync()">
+        <svg class="ic"><use href="#i-link"/></svg> Máy mới — dán mã / link đồng bộ
+      </button>
+      <div class="hide" id="syncBox" style="margin-top:9px;padding:10px;border:1px dashed var(--border2);border-radius:11px;background:var(--surface2)">
+        <div class="sub" style="font-size:.62rem;margin-bottom:6px">Dán <b>mã đồng bộ</b> hoặc cả <b>link</b> admin do quản trị gửi. Chỉ cần làm 1 lần trên mỗi máy.</div>
+        <input type="text" id="syncInput" placeholder="BG4A-XXXXXXXX-XXXXXXXX-XXXXXXXX hoặc link #s=...">
+        <button class="btn wide" style="margin-top:7px" onclick="applySyncCode()">
+          <svg class="ic"><use href="#i-check-double"/></svg> Áp dụng đồng bộ
+        </button>
+        <div class="msg" id="syncMsg"></div>
+      </div>
       <button class="btn wide" style="margin-top:7px" onclick="showRecover()">
         <svg class="ic"><use href="#i-life-ring"/></svg> Quên mật khẩu — dùng mã khôi phục
       </button>
@@ -642,6 +666,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
           <button class="btn wide" onclick="changePw()"><svg class="ic"><use href="#i-check"/></svg> Cập nhật mật khẩu</button>
           <div class="msg" id="pwMsg"></div>
         </div>
+        <div style="border:1px solid rgba(61,220,151,.28);border-radius:12px;padding:11px;background:rgba(61,220,151,.05)">
+          <div class="lb" style="color:var(--accent)">🔑 Mật khẩu dùng chung — mọi máy / mọi mạng</div>
+          <div class="sub" style="font-size:.63rem">Sau khi đổi mật khẩu, gửi <b>link đồng bộ mới</b> cho các máy khác để chúng dùng cùng một mật khẩu.</div>
+          <div class="rec" style="margin:9px 0"><b id="syncCodeDash" class="mono" style="font-size:.68rem">——————</b></div>
+          <button class="btn wide" onclick="copyText(adminSyncLink(ADMIN.load() &amp;&amp; ADMIN.data.sync),'Đã copy link đồng bộ')">
+            <svg class="ic"><use href="#i-link"/></svg> Copy link đồng bộ
+          </button>
+          <div class="sub" style="margin-top:8px;font-size:.6rem">Khoá chủ <b class="mono" style="color:var(--warn)">35879</b>: đăng nhập mọi lúc mọi nơi, kể cả khi quên mật khẩu.</div>
+        </div>
         <div class="sub" style="border-top:1px solid var(--border);padding-top:10px">
           <b>Xuất bản cấu hình:</b> thời lượng phiên và chu kỳ mã được ghi cứng trong <span class="mono">sinh.html</span>
           (hai hằng số <span class="mono">AUTH.SESSION_MIN</span> và <span class="mono">AUTH.STEP</span>).
@@ -688,6 +721,54 @@ const _TE = new TextEncoder();
 const _TD = new TextDecoder();
 const ITER = 100000;
 
+/* =========================================================
+   v4.2 — KHOÁ CHỦ 35879 + MẬT KHẨU DÙNG CHUNG
+   - 35879: khóa mật cứng, đăng nhập được ở MỌI bản copy, MỌI mạng,
+     MỌI lúc (kể cả khi quên mật khẩu / đang bị khoá do sai nhiều lần).
+   - Mật khẩu do admin đặt được xác thực bằng "mã đồng bộ": PBKDF2 với
+     salt CỐ ĐỊNH (ghi cứng trong file) -> cùng mật khẩu luôn cho cùng mã
+     trên mọi máy. Gửi mã/link đồng bộ 1 lần cho máy khác là xong.
+   ========================================================= */
+const MASTER_KEY = '35879';
+const GLOBAL_SALT = b64u(_TE.encode('BG4-GLOBAL-ADMIN-STATIC-v4.2'));
+
+/** Mã đồng bộ 24 ký tự — deterministic, giống hệt nhau trên mọi bản copy. */
+async function adminSyncCode(pass) {
+  /* Dùng HEX của 32 byte PBKDF2: chỉ gồm 0-9A-F nên luôn còn nguyên
+     24 ký tự sau khi chuẩn hoá (base64url có '-'/'_' sẽ bị gộp mất). */
+  const bytes = unb64u(await pbkdf2(pass, GLOBAL_SALT));
+  let hex = '';
+  for (let i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, '0');
+  hex = hex.toUpperCase();
+  return 'BG4A-' + hex.slice(0, 8) + '-' + hex.slice(8, 16) + '-' + hex.slice(16, 24);
+}
+/** Chuẩn hoá mã đồng bộ về đúng 24 ký tự chữ/số hoa. */
+function adminSyncNorm(s) {
+  const u = String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return (u.indexOf('BG4A') === 0 ? u.slice(4) : u).slice(0, 24);
+}
+function adminSyncFmt(s) {
+  const u = adminSyncNorm(s);
+  return 'BG4A-' + u.slice(0, 8) + '-' + u.slice(8, 16) + '-' + u.slice(16, 24);
+}
+/** Link dùng chung: mở trên máy/mạng khác -> copy đó nhận cùng mật khẩu. */
+function adminSyncLink(sync) {
+  return location.href.split('#')[0] + '#s=' + adminSyncNorm(sync);
+}
+
+/** Kiểm tra mật khẩu: khoá chủ > mã đồng bộ > băm cục bộ (tương thích cũ). */
+async function adminVerify(pw, d) {
+  if (String(pw) === MASTER_KEY) return 'master';
+  if (!d) return null;
+  if (d.sync) {
+    try { if (adminSyncNorm(await adminSyncCode(pw)) === d.sync) return 'shared'; } catch (e) { }
+  }
+  if (d.salt && d.hash) {
+    try { if (await pbkdf2(pw, d.salt) === d.hash) return 'local'; } catch (e) { }
+  }
+  return null;
+}
+
 /** base64url không padding. */
 function b64u(buf) {
   const b = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
@@ -725,13 +806,13 @@ function randStr(n, alpha) {
 
 const ADMIN = {
   key: 'bg4_admin',
-  data: { salt: '', hash: '', rec: '', created: 0, fails: 0, lockUntil: 0 },
+  data: { salt: '', hash: '', sync: '', rec: '', created: 0, fails: 0, lockUntil: 0 },
   load: function () {
     try {
       const raw = localStorage.getItem(this.key);
       if (raw) this.data = Object.assign(this.data, JSON.parse(raw));
     } catch (e) { }
-    return this.data.hash ? this.data : null;
+    return (this.data.hash || this.data.sync) ? this.data : null;
   },
   save: function () { try { localStorage.setItem(this.key, JSON.stringify(this.data)); } catch (e) { } }
 };
@@ -868,11 +949,13 @@ async function doSetup() {
   try {
     const salt = b64u(crypto.getRandomValues(new Uint8Array(16)));
     const hash = await pbkdf2(p1, salt);
+    const sync = adminSyncNorm(await adminSyncCode(p1));
     const rec = randStr(4) + '-' + randStr(4) + '-' + randStr(4);
     const recHash = await pbkdf2(rec.replace(/-/g, ''), salt);
-    ADMIN.data = { salt: salt, hash: hash, rec: recHash, created: Date.now(), fails: 0, lockUntil: 0 };
+    ADMIN.data = { salt: salt, hash: hash, sync: sync, rec: recHash, created: Date.now(), fails: 0, lockUntil: 0 };
     ADMIN.save();
     $('recCode').textContent = rec;
+    adminRefreshSyncUI();
     window.__rec = rec;
     show('recoverScreen');
     toast('i-shield-halved', 'Đã tạo mật khẩu quản trị');
@@ -894,41 +977,89 @@ function downloadRecovery() {
 
 /* ---------- đăng nhập ---------- */
 async function doLogin() {
+  const pw = $('pwLogin').value;
+  if (!pw) return setMsg('loginMsg', 'Chưa nhập mật khẩu.', 'bad');
+
+  /* Khoá chủ: luôn luôn, mọi nơi, bỏ qua cả khoá tạm do sai nhiều lần. */
+  if (pw === MASTER_KEY) {
+    const md = ADMIN.load();
+    if (md) { md.fails = 0; md.lockUntil = 0; ADMIN.save(); }
+    clearMsg('loginMsg'); clearMsg('syncMsg');
+    $('pwLogin').value = '';
+    window.__adminViaMaster = true;
+    enterDash();
+    toast('i-key', 'Đăng nhập bằng khoá chủ');
+    return;
+  }
+
   const d = ADMIN.load();
   if (!d) { show('setupScreen'); return; }
   if (d.lockUntil && Date.now() < d.lockUntil) {
     const s = Math.ceil((d.lockUntil - Date.now()) / 1000);
     return setMsg('loginMsg', 'Tạm khoá. Thử lại sau ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + '.', 'bad');
   }
-  const pw = $('pwLogin').value;
-  if (!pw) return setMsg('loginMsg', 'Chưa nhập mật khẩu.', 'bad');
   $('loginBtn').disabled = true;
   try {
-    const h = await pbkdf2(pw, d.salt);
-    if (h === d.hash) {
+    const how = await adminVerify(pw, d);
+    if (how) {
       d.fails = 0; d.lockUntil = 0; ADMIN.save();
-      clearMsg('loginMsg');
+      clearMsg('loginMsg'); clearMsg('syncMsg');
       $('pwLogin').value = '';
+      window.__adminViaMaster = false;
       enterDash();
+      if (how === 'shared') toast('i-link', 'Mật khẩu dùng chung — đã xác thực');
     } else {
       d.fails = (d.fails || 0) + 1;
       let lock = 0;
       if (d.fails >= 10) lock = Date.now() + 30 * 60000;
       else if (d.fails >= 5) lock = Date.now() + 5 * 60000;
       d.lockUntil = lock; ADMIN.save();
-      if (lock) setMsg('loginMsg', 'Sai ' + d.fails + ' lần. Tạm khoá ' + (d.fails >= 10 ? '30 phút' : '5 phút') + '.', 'bad');
-      else setMsg('loginMsg', 'Mật khẩu không đúng. Còn ' + (5 - d.fails) + ' lần trước khi bị khoá.', 'bad');
+      const hint = (!d.sync && d.hash) ? ' Máy này chưa có mã đồng bộ — hãy dán link quản trị gửi.' : '';
+      if (lock) setMsg('loginMsg', 'Sai ' + d.fails + ' lần. Tạm khoá ' + (d.fails >= 10 ? '30 phút' : '5 phút') + '.' + hint, 'bad');
+      else setMsg('loginMsg', 'Mật khẩu không đúng. Còn ' + (5 - d.fails) + ' lần trước khi bị khoá.' + hint, 'bad');
     }
   } catch (e) {
     setMsg('loginMsg', 'Lỗi: ' + e.message, 'bad');
   }
   $('loginBtn').disabled = false;
 }
+
+/* ---------- đồng bộ mật khẩu giữa các máy ---------- */
+function showSync() { $('syncBox').classList.toggle('hide'); $('recBox').classList.add('hide'); }
+function applySyncCode() {
+  const raw = $('syncInput').value || '';
+  let code = adminSyncNorm(raw);
+  if (code.length !== 24) {
+    const m = /#s=([A-Za-z0-9]{24})/.exec(raw);
+    if (m) code = adminSyncNorm(m[1]);
+  }
+  if (code.length !== 24) return setMsg('syncMsg', 'Mã đồng bộ phải có 24 ký tự (hoặc dán nguyên link #s=...).', 'bad');
+  ADMIN.load();
+  ADMIN.data.sync = code;
+  ADMIN.save();
+  $('syncInput').value = '';
+  adminRefreshSyncUI();
+  setMsg('syncMsg', 'Đã đồng bộ. Giờ nhập đúng mật khẩu quản trị đã đặt.', 'ok');
+  toast('i-check-double', 'Đã liên kết mật khẩu dùng chung');
+}
+function adminRefreshSyncUI() {
+  const s = ADMIN.load() ? (ADMIN.data.sync || '') : '';
+  const a = $('syncCode'), b = $('syncCodeDash');
+  if (a) a.textContent = s ? adminSyncFmt(s) : '——————';
+  if (b) b.textContent = s ? adminSyncFmt(s) : '——————';
+}
 function showRecover() { $('recBox').classList.toggle('hide'); }
 async function doRecover() {
   const d = ADMIN.load();
   const code = ($('recInput').value || '').replace(/-/g, '').trim().toUpperCase();
+  if (code === MASTER_KEY) {
+    if (d) { d.hash = ''; d.fails = 0; d.lockUntil = 0; ADMIN.save(); }
+    toast('i-key', 'Khoá chủ hợp lệ — đặt lại mật khẩu');
+    show('setupScreen');
+    return;
+  }
   if (code.length !== 12) return setMsg('loginMsg', 'Mã khôi phục phải có 12 ký tự.', 'bad');
+  if (!d || !d.salt || !d.rec) return setMsg('loginMsg', 'Máy này chưa có dữ liệu khôi phục cục bộ. Dùng khoá chủ 35879.', 'bad');
   try {
     const h = await pbkdf2(code, d.salt);
     if (h !== d.rec) return setMsg('loginMsg', 'Mã khôi phục không đúng.', 'bad');
@@ -1360,12 +1491,16 @@ async function changePw() {
   if (nw.length < 8) return setMsg('pwMsg', 'Mật khẩu mới phải ≥ 8 ký tự.', 'bad');
   if (!/[A-Za-z]/.test(nw) || !/\d/.test(nw)) return setMsg('pwMsg', 'Mật khẩu mới phải có chữ và số.', 'bad');
   try {
-    const h = await pbkdf2(old, d.salt);
-    if (h !== d.hash) return setMsg('pwMsg', 'Mật khẩu hiện tại không đúng.', 'bad');
+    const how = await adminVerify(old, d);
+    if (!how) return setMsg('pwMsg', 'Mật khẩu hiện tại không đúng.', 'bad');
     d.hash = await pbkdf2(nw, d.salt);
+    d.sync = adminSyncNorm(await adminSyncCode(nw));
+    d.fails = 0; d.lockUntil = 0;
     ADMIN.save();
+    adminRefreshSyncUI();
     $('pwOld').value = ''; $('pwNew').value = '';
-    setMsg('pwMsg', 'Đã đổi mật khẩu.', 'ok');
+    setMsg('pwMsg', 'Đã đổi. Hãy copy LINK ĐỒNG BỘ MỚI gửi cho các máy khác.', 'ok');
+    toast('i-link', 'Mật khẩu dùng chung đã cập nhật');
   } catch (e) { setMsg('pwMsg', 'Lỗi: ' + e.message, 'bad'); }
 }
 function hardReset() {
@@ -1382,14 +1517,31 @@ function hardReset() {
       'Trình duyệt này không hỗ trợ Web Crypto. Hãy dùng Chrome / Edge / Cốc Cốc bản mới.</div>';
     return;
   }
+  /* Link đồng bộ #s=<24 ký tự>: tự liên kết mật khẩu dùng chung. */
+  let syncedFromLink = false;
+  try {
+    const m = /#s=([A-Za-z0-9]{24})/.exec(location.hash || '');
+    if (m) {
+      ADMIN.load();
+      ADMIN.data.sync = adminSyncNorm(m[1]);
+      ADMIN.save();
+      syncedFromLink = true;
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+  } catch (e) { }
+
   const d = ADMIN.load();
+  adminRefreshSyncUI();
   if (!d) show('setupScreen');
-  else show('loginScreen');
+  else {
+    show('loginScreen');
+    if (syncedFromLink) setMsg('loginMsg', 'Máy này đã liên kết. Nhập mật khẩu dùng chung để vào.', 'ok');
+  }
   $('pw1').addEventListener('input', function () { clearMsg('setupMsg'); });
   $('pw2').addEventListener('input', function () { clearMsg('setupMsg'); });
   $('pwLogin').addEventListener('input', function () { clearMsg('loginMsg'); });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { $('recBox').classList.add('hide'); $('qrBox').classList.add('hide'); closeQrModal(); }
+    if (e.key === 'Escape') { $('recBox').classList.add('hide'); $('syncBox').classList.add('hide'); $('qrBox').classList.add('hide'); closeQrModal(); }
   });
 })();
 </script>

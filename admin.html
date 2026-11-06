@@ -264,7 +264,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 
 .modal-box .sub{margin-bottom:14px}
 
 /* ---------- audio toggle ---------- */
-.audio-toggle{position:fixed;right:12px;top:12px;z-index:90;width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--text3);display:grid;place-items:center;cursor:pointer;transition:.2s}
+.audio-toggle{position:static;flex:0 0 auto;width:34px;height:34px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);color:var(--text3);
+  display:grid;place-items:center;cursor:pointer;transition:.2s}
+.top .audio-toggle{margin:0}
+.top .audio-toggle:hover{color:var(--accent);border-color:var(--accent)}
+@media(max-width:520px){
+  .top{padding:9px 10px;gap:7px}
+  .top h1{font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top .sub{font-size:.52rem}
+  .top .logo{width:30px;height:30px}
+  .top .audio-toggle,.top .btn{width:32px;height:32px}
+}
 .audio-toggle:hover{color:var(--accent);border-color:var(--accent)}
 .audio-toggle.on{color:var(--accent)}
 
@@ -403,6 +414,11 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .authcard{animation:nxCardIn .5s var(--nx-ease) both}
 </style>
   <noscript><link rel="preconnect" href="https://fonts.googleapis.com"></noscript>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="./icon-192.png" type="image/png">
 </head>
 <body>
 <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
@@ -647,6 +663,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     </div>
     <div class="spacer"></div>
     <span class="nx-badge" title="Hệ thống sẵn sàng"><span class="nx-dot"></span> SYSTEM ONLINE</span>
+    <button class="audio-toggle on" id="audioToggle" onclick="AudioFX.toggle()" title="Âm thanh" aria-label="Bật tắt âm thanh">
+      <svg class="ic"><use href="#i-volume-high"/></svg>
+    </button>
     <button class="btn" onclick="doLogout()" aria-label="Đăng xuất"><svg class="ic"><use href="#i-arrow-right-from-bracket"/></svg></button>
   </div>
 
@@ -855,11 +874,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <div class="tiny" id="qrModalHint" style="margin-bottom:10px">Quét mã QR bằng điện thoại để nhập nhanh.</div>
     <button class="btn pri wide" onclick="closeQrModal()">Đóng</button>
   </div>
-</div>
-
-<!-- audio toggle -->
-<div class="audio-toggle on" id="audioToggle" onclick="AudioFX.toggle()" title="Âm thanh">
-  <svg class="ic"><use href="#i-volume-high"/></svg>
 </div>
 
 <div id="toastWrap"></div>
@@ -1764,13 +1778,23 @@ function exportCsv() {
 
 /* ---------- cài đặt ---------- */
 async function changePw() {
-  const d = ADMIN.load();
+  /* v5.5 — FIX: đăng nhập bằng khoá chủ khi CHƯA thiết lập mật khẩu thì ADMIN.load()
+     trả null → đổi mật khẩu ném "Cannot read properties of null". Giờ khởi tạo
+     bản ghi mới ngay trong lần đổi đầu tiên. */
+  let d = ADMIN.load();
   const old = $('pwOld').value, nw = $('pwNew').value;
   if (nw.length < 8) return setMsg('pwMsg', 'Mật khẩu mới phải ≥ 8 ký tự.', 'bad');
   if (!/[A-Za-z]/.test(nw) || !/\d/.test(nw)) return setMsg('pwMsg', 'Mật khẩu mới phải có chữ và số.', 'bad');
   try {
-    const how = await adminVerify(old, d);
+    const how = d ? await adminVerify(old, d) : (await adminIsMaster(old) ? 'master' : null);
     if (!how) return setMsg('pwMsg', 'Mật khẩu hiện tại không đúng.', 'bad');
+    if (!d) {
+      d = ADMIN.data = {
+        salt: b64u(crypto.getRandomValues(new Uint8Array(16))),
+        hash: '', sync: '', rec: '', created: Date.now(), fails: 0, lockUntil: 0, builtinOff: false
+      };
+    }
+    if (!d.salt) d.salt = b64u(crypto.getRandomValues(new Uint8Array(16)));
     d.hash = await pbkdf2(nw, d.salt);
     d.sync = adminSyncNorm(await adminSyncCode(nw));
     d.fails = 0; d.lockUntil = 0;
@@ -1865,5 +1889,13 @@ function hardReset() {
 })();
 </script>
 
+<script>/* __bg4PWA */
+/* v5.2 — PWA: chỉ đăng ký khi chạy qua http(s); file:// sẽ bỏ qua an toàn. */
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () { });
+  });
+}
+</script>
 </body>
 </html>

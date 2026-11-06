@@ -27,6 +27,11 @@
     footer{margin-top:22px;text-align:center;color:#7488a2;font-size:12px}
     @media(max-width:650px){body{padding:16px 13px 28px}header{padding-top:25px}.cards{grid-template-columns:1fr}.card{min-height:215px;padding:20px}}
   </style>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="./icon-192.png" type="image/png">
 </head>
 <body>
   <main>
@@ -51,5 +56,13 @@
     </section>
 <footer>BioGalaxy • Sinh học 12</footer>
   </main>
+<script>/* __bg4PWA */
+/* v5.2 — PWA: chỉ đăng ký khi chạy qua http(s); file:// sẽ bỏ qua an toàn. */
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () { });
+  });
+}
+</script>
 </body>
 </html>

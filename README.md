@@ -2,7 +2,7 @@
 
 Ứng dụng học tập Sinh học 12 chạy hoàn toàn trên trình duyệt (GitHub Pages), gồm **ứng dụng học sinh** (`sinh.html`), **bảng quản trị** (`admin.html`), **cổng vào** (`index.html`) và công cụ build icon (`_ins_sprite.js`).
 
-Phiên bản tài liệu: **v5.5** · Năm học: **2026–2027**.
+Phiên bản tài liệu: **v5.8** · Năm học: **2026–2027**.
 
 ---
 
@@ -31,8 +31,6 @@ sw.js                 Service Worker (cache lõi, offline)
 icon-192.png           Icon PWA
 icon-512.png           Icon PWA
 _ins_sprite.js        Script build: chèn sprite SVG, dọn CSS rác, font async
-tests/smoke.py        Kiểm thử khói bằng Chrome DevTools Protocol
-backend/              Kiến trúc backend đề xuất (CHƯA cấu hình — xem backend/README.md)
 *.bak_*               Bản sao lưu trước mỗi phiên bản (không phải trang ứng dụng)
 ```
 
@@ -69,6 +67,91 @@ backend/              Kiến trúc backend đề xuất (CHƯA cấu hình — x
 - Nhật ký thao tác, xuất CSV/JSON.
 
 ---
+
+## 3a. v5.6 — nội dung lớp 11 & sửa luồng đấu online
+
+### Ôn lớp 11 (tab mới trong dock, **nhúng ngay trong `sinh.html`**, không tạo file/thư mục mới)
+Nguồn: `bài tập 1 - 11A2.docx` · `BT 2 - lớp 11a2.docx` · `11A2.docx` ·
+`ĐỀ CƯƠNG ÔN THI CUỒI KÌ 1- LỚP 11 (HS).docx` · `ĐỀ CƯƠNG ÔN THI HSG - LỚP 11.docx`.
+**10 chủ đề / 104 câu**, mỗi chủ đề có 3 khung: *NÓI THẬT CHẬM* (giải thích không dùng từ khó),
+*GIỐNG NHƯ THẾ NÀY* (ví dụ đời thường), *CHỈ CẦN NHỚ* (câu chốt). Bấm đáp án là hiện lời giải ngay;
+có ô tìm kiếm toàn văn. Các câu phụ thuộc hình ảnh trong bản gốc được bỏ qua để không đoán sai đáp án.
+
+### Sửa lỗi đấu 2–15 người & 1v1
+| Vấn đề | Cách sửa |
+|---|---|
+| Một người nộp sớm → cả phòng bị ép nộp và người chưa xong **0 điểm** | Người nộp sớm vào màn chờ; Host phát `firstDone` + đếm ngược; người khác làm tiếp; hết giờ phát `collect`, ai chưa nộp **tự nộp theo đúng các câu đã trả lời**; `progress` nay mang kèm đáp án để chấm một phần |
+| Bật "Dùng mạng" không thấy ô số mạng/tim và kiểu mạng | Thêm bảng cấu hình: số mạng (1–99), kiểu kết nối (tự động / LAN / relay / offline), thời gian chờ sau người nộp đầu (5–120 giây); đồng bộ sang bảng chủ phòng, VS và 1v1 cũ |
+| 1v1 online kiểu cũ không chỉnh được thông số | Màn hình cấu hình có thêm ô số tự do cho số câu, thời gian, số mạng + chọn kiểu kết nối (vẫn giữ nút bấm nhanh) |
+| Xem lại bài sau 2–15 / 1v1 / VS chỉ hiện chữ cái đáp án | Mỗi câu giờ có đủ: câu hỏi, đáp án bạn chọn (chữ + nội dung), đáp án đúng (chữ + nội dung), **Vì sao**, gợi ý và bẫy |
+| Bấm nhầm "Rời phòng / Thoát" mất cả trận | Hiện xác nhận "Bạn có muốn thoát phòng không?" (cả phòng 2–15, 1v1 online, VS cùng máy) |
+| Kiểu cũ còn nút Trước/Sau, chọn xong đứng yên | Ẩn nút chuyển, **chọn xong tự sang câu tiếp**, không hiện đúng/sai giữa chừng, chỉ chấm sau khi nộp bài |
+
+### Làm đẹp & giải trí
+- Phòng chờ: thẻ người chơi có hiệu ứng vào, mã phòng nổi bật, banner trạng thái nhịp nhàng.
+- **Mini-game khủng long** (Canvas 2D thuần, không CDN): bầu trời đêm có sao/trăng/mây, đồi xa, xương rồng, khủng long nhảy bằng Space / ↑ / chạm, **3 mạng**, điểm tăng dần, bụi khi mất mạng, màn hình hết mạng, nút Chơi lại. Tự dừng khi vào trận / ẩn tab / tắt hiệu ứng nặng.
+- Lab: thêm lớp phản xạ kính và ánh sáng đỉnh cho khung thí nghiệm (tắt trên điện thoại để đỡ tải GPU).
+- Dock 10 tab trên điện thoại cuộn ngang, vẫn hiện nhãn, thanh chỉ thị tự căn theo tab đang chọn.
+
+## 3d. v5.8 — không khí lab, game mới, hiệu ứng 3D
+
+### Thí nghiệm (áp dụng cho **cả 23 lab**, không riêng lab nào)
+- **Lớp khí quyển dùng chung**: quầng sáng màu theo từng thí nghiệm, hai luồng sáng chéo, ánh sáng trần,
+  16 hạt bụi lơ lửng, sương nền và vignette. Gradient được **cache** theo kích thước/theme/màu nên không tạo lại mỗi khung hình.
+- **Màu nhận diện riêng**: 12 màu luân phiên theo thứ tự lab, áp cho viền 4 góc, HUD và **số đo** (đặt biến ở `#view-lab` để readout bên ngoài canvas cũng nhận).
+- **Nghiêng 3D theo con trỏ** (desktop, không Lite): `perspective(1200px)` + `rotateX/rotateY` tối đa ~3–4°, kèm vệt phản chiếu chạy theo chuột.
+- Thêm `contain: layout paint` cho khung lab.
+
+### Game khủng long (phòng chờ)
+- **Parallax 2 dãy đồi**, mây trôi, sao mờ dần, chu kỳ **ngày/đêm** theo điểm.
+- **Nhảy đôi** (Space/↑/chạm), nghiêng thân theo vận tốc, bụi khi tiếp đất.
+- **Nhặt 🧬 +6 điểm** có quầng sáng, chữ "+6" bay lên, âm thanh riêng.
+- **Rung màn hình + chớp đỏ** khi va chạm; khủng long to hơn (32×24), có gai lưng, mắt có điểm sáng, chân chạm đất.
+- HUD 3 tim mờ dần theo mạng còn lại, lưu kỷ lục trong phiên.
+
+### Hiệu ứng chung
+- **Gợn sóng khi bấm** trên nút/modecard/seg/keycap (rất rẻ, chạy cả ở Lite).
+- **Thanh tiến trình cuộn** 2px ở đỉnh trang, gradient cyan → xanh lá → tím.
+- Hover card có viền sáng và bóng mềm (chỉ desktop).
+
+### Tối ưu
+- Bụi/luồng sáng tự tắt ở Lite và điện thoại; gradient cache; `requestAnimationFrame` gộp cho tilt và thanh cuộn.
+- Đo lại trong cùng môi trường headless: lab **29 → 34 fps** (không giảm).
+
+## 3c. v5.7 — Casio BIO-HACKS 2.0 (13 kỹ thuật)
+
+Tab Casio được chia **3 phân hệ**:
+
+1. **Cheat-sheet** — 13 thẻ gập, mỗi thẻ có: bản chất Sinh học, công thức, **chuỗi phím dạng keycap
+   kim loại** (chữ vàng cho SHIFT/MENU/OPTN, đỏ cho ALPHA, xanh cho `=`) và ghi chú cạm bẫy.
+2. **Máy tính theo dạng bài** — 7 máy tính cũ + **6 máy tính mới**: nhập số liệu đề, bấm tính là ra
+   kết quả *và* chuỗi phím đã điền đúng con số của bạn.
+3. **Giả lập fx-580VN X** — máy ảo có màn hình LCD, 30 phím, chạy demo từng phím: phím sáng lên,
+   màn hình in ra đúng dòng máy thật sẽ hiện, kèm danh sách bước.
+
+### 6 kỹ thuật nâng cao (HSG / phân hoá 9+)
+
+| # | Kỹ thuật | Ví dụ mặc định | Kết quả |
+|---|---|---|---|
+| ⑧ | **Ma trận Markov** (MENU 4) — tự phối n thế hệ | P: 0,3 AA : 0,6 Aa : 0,1 aa, n = 3 | F3 = **0,5625 / 0,075 / 0,3625** |
+| ⑨ | **Hồi quy hàm mũ** (MENU 6 → 5) | 0h:100 · 2h:400 · 4h:1600 · 6h:6400 | a = 100, b = 0,693147, N(10) = **102400** |
+| ⑩ | **Kiểm định χ²** (STO M+) | 315 : 108 : 101 : 32 | χ² = **0,47** < 7,815 → nhận H₀ |
+| ⑪ | **Nhóm máu ABO** (STO biến) | O = 4%, A = 21% | r = 0,2 · p = 0,3 · q = 0,5 · B dị hợp = **20%** |
+| ⑫ | **Tứ bội 4n × 4n** (nCr) | AAaa × Aaaa | aaaa = **1/12**, trội = 11/12 |
+| ⑬ | **Bản đồ 3 điểm** (testcross) | 580/592 · 40/45 · 89/94 · 3/5 | A–B = **6,42 cM**, B–C = **13,19 cM**, C = 0,652 |
+
+Mọi kết quả đều được tính lại độc lập bằng JavaScript để đối chiếu với máy; dữ liệu vô lý bị chặn
+bằng thông báo rõ ràng (tổng tỉ lệ ≠ 1, số mũ âm, tỉ lệ χ² sai số lượng, O = 0…).
+
+### Sửa lỗi & tối ưu trong v5.7
+- **Lỗi thuật toán bản đồ 3 điểm**: chuẩn hoá mặt nạ gen bằng `Math.min` khiến mặt nạ 1 bit ở vị trí C
+  bị đổi thành 3 bit và bị bỏ qua → khoảng cách thứ hai tụt về đúng tần số hoán vị kép (0,55 thay vì 13,19 cM).
+  Đã đổi sang so sánh **số bit** (popcount).
+- **Ô chọn bài của giả lập không khớp** bài đang chạy (hiện "Nhị thức" nhưng dữ liệu Markov) → đồng bộ lại.
+- **CSS sai cú pháp**: `@media` lồng trong danh sách selector làm hỏng cả rule → tách ra.
+- Cheat-sheet, 6 máy tính và giả lập đều **render khi mở lần đầu**, không dựng sẵn lúc khởi động.
+- Lab có **màu nhận diện riêng** cho từng thí nghiệm (viền góc + HUD), thêm `contain: layout paint`.
+- Keycap đổi sang **kim loại**, có biến thể sáng/tối; hero có vệt sáng xoay chậm (tắt ở Lite/phone).
 
 ## 3b. Những lỗi đã sửa ở v5.5 (soát toàn bộ)
 
@@ -122,14 +205,17 @@ Lưu ý: GitHub Pages phục vụ tĩnh, **không chạy được backend**. Cá
 
 ---
 
-## 7. Backend (chưa cấu hình)
+## 7. Backend (không kèm trong bản này)
 
-Thư mục `backend/` chứa:
-- `README.md`: kiến trúc đề xuất (Supabase), mô hình dữ liệu, RLS, Edge Function ký key.
-- `supabase-schema.sql`: bảng + chính sách RLS mẫu.
-- `config.example.js`: mẫu cấu hình **chỉ chứa placeholder**.
+Bản phát hành này **chỉ gồm các tệp tĩnh** ở trên — không có thư mục backend, không có schema, không có khoá nào.
 
-**Không có khoá thật nào trong repo.** Ứng dụng hiện **không** gọi backend; mọi thứ vẫn chạy cục bộ. Khi cấu hình Supabase, chỉ đưa `SUPABASE_URL` + `anon key` vào client; **tuyệt đối không** đưa `service_role` hoặc private key vào HTML/JS.
+Nếu sau này cần đồng bộ đa thiết bị / lớp học / chống sửa điểm, phải dựng backend riêng (Supabase hoặc Firebase) và:
+- giữ **private key ký key truy cập** trong secret của server, không bao giờ gửi xuống trình duyệt;
+- bật **RLS** cho mọi bảng, chỉ đưa `anon key` ra client;
+- chấm điểm bằng RPC ở server, không nhận `score` từ client;
+- **không** đặt `service_role key` trong HTML/JS.
+
+Khi chưa có backend, các giới hạn ở mục 4 vẫn đúng: không phân quyền thật, không chống sửa điểm, không đồng bộ thật giữa các máy.
 
 ---
 
@@ -153,20 +239,23 @@ Thư mục `backend/` chứa:
 - Vòng đời bài thi: rời tab → `timerId = null`, phòng thi đóng.
 - Backup: `validate(null)` và JSON thiếu `data` trả lỗi thay vì ném exception.
 - Admin: đổi mật khẩu từ khoá chủ (chưa thiết lập) hoạt động; đăng nhập bằng mật khẩu mới OK.
+- v5.6: 10 chủ đề / 104 câu lớp 11; cấu hình mạng/tim/grace; mini-game khủng long (nhảy, mất mạng, chơi lại, tự dừng); mô phỏng 2 người — người nộp sớm vào màn chờ, người còn lại làm tiếp và **được 3.33 điểm cho 1 câu làm đúng** thay vì 0; review có "Vì sao"; xác nhận thoát phòng; 4 viewport không tràn.
+- v5.7: 13 kỹ thuật Casio (cheat-sheet), 6 máy tính nâng cao đúng số liệu, giả lập 30 phím dựng được
+  chuỗi bước và in màn hình; bản đồ 3 điểm 6,42/13,19 cM; không tràn ngang ở 4 kích thước.
+- v5.8: 23/23 lab vẽ được sau khi thêm lớp khí quyển (đo pixel: không canvas nào trắng); màu nhận diện
+  lan tới readout; tilt 3D trả `--tilt-x/--tilt-y`; game: nhảy đôi, nhặt 🧬 +6, mất mạng → hết mạng → chơi lại;
+  gợn sóng tạo và tự xoá sau 0.54s; thanh cuộn `scaleX` đúng; ghi `store` → reload → dữ liệu và UUID còn nguyên.
 - Tải sạch 3 tệp (sinh/admin/index): **0 lỗi runtime**.
 
-### Chạy lại bộ kiểm thử
+### Cách tự kiểm tra nhanh sau khi sửa
 
-```bash
-python -m pip install websocket-client
-python tests/smoke.py
-# hoặc chỉ định Chrome/Edge khác:
-python tests/smoke.py --chrome "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe"
-```
-
-`tests/smoke.py` tự mở HTTP server, chạy 6 nhóm kiểm tra (khởi động + PWA, đề 18·4·6, xem lại câu sai, flashcard/gia sư/sơ đồ, admin, 4 kích thước màn hình) và trả mã thoát `0` khi tất cả đạt. Mỗi probe dùng profile Chrome mới và chờ app khởi tạo xong nên kết quả xác định, không phụ thuộc `sleep`.
-
-Chưa có CI sẵn; có thể gắn `python tests/smoke.py` vào GitHub Actions (runner có Chrome) nếu cần.
+Bản này **không kèm thư mục test**. Muốn kiểm tra lại, mở `sinh.html` qua HTTP rồi:
+1. **Console**: phải trắng, không lỗi đỏ.
+2. **Đề 18·4·6**: làm đúng hết → 10.00; làm sai → xem lại có "Vì sao".
+3. **Lab**: kéo thanh trượt, chạm canvas, đổi thí nghiệm — không giật, không trắng canvas.
+4. **Casio**: bấm "Tính" ở 6 máy tính nâng cao, đối chiếu số với máy thật.
+5. **Đấu online**: mở 2 tab, tạo phòng, nộp sớm ở tab A → tab B vẫn làm tiếp.
+6. **Sao lưu**: Xuất JSON → Nhập lại → UUID và lịch sử không đổi.
 
 ---
 

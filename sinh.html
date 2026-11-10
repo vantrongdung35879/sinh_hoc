@@ -2119,6 +2119,99 @@ html[data-gfx="lite"] #scrollBar{display:none}
 .cmsg.me{align-self:flex-end;background:rgba(61,220,151,.16);border:1px solid rgba(61,220,151,.3)}
 .cmsg.you{align-self:flex-start;background:var(--surface2);border:1px solid var(--border)}
 @media(max-width:700px){.accchip #accChipName,.streakchip .tiny{display:none}.accchip{max-width:46px}.streakchip{max-width:62px}}
+/* ---- v5.13 · chuyển cảnh, gợn nút, confetti ---- */
+.view.view-in{animation:viewIn .42s cubic-bezier(.2,.8,.3,1)}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.btn,.iconbtn,.chip,.modecard,.avbtn{position:relative;overflow:hidden}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.38);transform:scale(0);
+  animation:rip .6s ease-out;pointer-events:none;z-index:0}
+@keyframes rip{to{transform:scale(2.8);opacity:0}}
+.modal:not(.hide) .box{animation:modalIn .26s cubic-bezier(.2,.8,.3,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+.card,.acc{transition:transform .22s var(--ease),border-color .22s,box-shadow .22s}
+@media(hover:hover){
+  .card:hover,.acc:hover{transform:translateY(-2px);border-color:var(--border2);box-shadow:0 18px 40px -30px rgba(0,0,0,.85)}
+}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:220;overflow:hidden}
+.confetti i{position:absolute;top:-14px;width:8px;height:13px;border-radius:2px;
+  animation:confFall 2.2s ease-in forwards}
+@keyframes confFall{to{transform:translate(var(--x),108vh) rotate(var(--r,540deg));opacity:.85}}
+html[data-fx="off"] .view.view-in,html[data-fx="off"] .modal:not(.hide) .box,
+html[data-fx="off"] .confetti i,html[data-fx="off"] .ripple{animation:none!important}
+@media(prefers-reduced-motion:reduce){
+  .view.view-in,.modal:not(.hide) .box,.confetti i,.ripple{animation:none!important}
+}
+/* ---- v5.13 · Hiểu sâu 7 chuyên đề ---- */
+.deephero{display:flex;gap:10px;padding:11px;border-radius:14px;background:linear-gradient(135deg,rgba(61,220,151,.10),rgba(56,189,248,.08));border:1px solid rgba(61,220,151,.22);margin-bottom:10px}
+.deephero .dicon{font-size:1.8rem;line-height:1}
+.deephero b{font-size:.8rem}
+.deephero p{margin:4px 0 0;font-size:.7rem;line-height:1.55;color:var(--text2)}
+.dsteps{display:grid;gap:6px;margin:10px 0}
+@media(min-width:700px){.dsteps{grid-template-columns:1fr 1fr}}
+.dstep{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;border-radius:11px;background:var(--surface2);border:1px solid var(--border);font-size:.68rem;line-height:1.5}
+.dstep i{flex:0 0 auto;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#04140d;font-style:normal;font-weight:900;font-size:.6rem}
+.dgrid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+@media(max-width:640px){.dgrid2{grid-template-columns:1fr}}
+.dcard{padding:9px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);font-size:.66rem;line-height:1.5}
+.dcard.bad{border-color:rgba(251,113,133,.25);background:rgba(251,113,133,.06)}
+.dcard.ok{border-color:rgba(61,220,151,.25);background:rgba(61,220,151,.06)}
+.dcard ul{margin:6px 0 0;padding-left:16px}
+.dcard li{margin-bottom:4px}
+.dq{border-bottom:1px dashed var(--border);padding:4px 0}
+.dq summary{cursor:pointer;font-weight:700;font-size:.66rem}
+.dq div{margin-top:3px;color:var(--text2);font-size:.64rem}
+.dmapwrap{margin-top:10px}
+.dmapwrap>b{font-size:.72rem}
+.dmap{width:100%;height:auto;display:block;margin-top:6px}
+.dmap rect{fill:var(--surface3);stroke:var(--border2)}
+.dmap text{fill:var(--text);font-size:10.5px;font-weight:700}
+.dmap line{stroke:var(--accent);stroke-width:1.6;opacity:.45;stroke-dasharray:4 4}
+.miniheat{display:grid;grid-template-columns:repeat(14,1fr);gap:3px;margin:8px 0;max-width:320px}
+.miniheat i{aspect-ratio:1;border-radius:3px;background:var(--surface3);border:1px solid var(--border)}
+.miniheat i.lv1{background:rgba(61,220,151,.18);border-color:rgba(61,220,151,.25)}
+.miniheat i.lv2{background:rgba(61,220,151,.38);border-color:rgba(61,220,151,.4)}
+.miniheat i.lv3{background:rgba(61,220,151,.62);border-color:rgba(61,220,151,.6)}
+.miniheat i.lv4{background:rgba(61,220,151,.9);border-color:rgba(61,220,151,.9)}
+/* ---- v5.14 · Nến học tập ---- */
+.candle-stage{position:relative;height:min(52vh,430px);display:grid;place-items:center;overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 18%,rgba(251,191,36,.12),transparent 62%),linear-gradient(180deg,#0b0d14,#05070c);
+  border:1px solid var(--border2);border-radius:22px}
+html[data-theme="light"] .candle-stage{background:radial-gradient(120% 90% at 50% 18%,rgba(251,191,36,.18),transparent 62%),linear-gradient(180deg,#fff8ec,#f0e6d2)}
+.candle-stage canvas{width:100%;height:100%;display:block}
+.candle-status{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:.66rem;color:var(--text2);
+  background:rgba(4,12,22,.55);border:1px solid var(--border);border-radius:999px;padding:4px 12px;
+  backdrop-filter:blur(6px);white-space:nowrap}
+html[data-theme="light"] .candle-status{background:rgba(255,255,255,.78)}
+.candle-presets{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 8px}
+.candle-presets button{padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);
+  color:var(--text2);font:inherit;font-size:.66rem;font-weight:700;cursor:pointer;transition:.18s}
+.candle-presets button.on{border-color:var(--accent);color:var(--accent);background:rgba(61,220,151,.10);
+  box-shadow:0 0 0 1px rgba(61,220,151,.18)}
+.candle-range{margin:8px 0 10px}
+.candle-range input{width:100%}
+.candle-controls{display:flex;gap:8px;margin-top:10px}
+.candle-summary{margin-top:10px;padding:10px;border-radius:14px;background:rgba(61,220,151,.07);
+  border:1px solid rgba(61,220,151,.25);font-size:.7rem;line-height:1.55}
+.candle-mini{position:fixed;left:12px;right:auto;bottom:calc(var(--dock-h) + 84px);z-index:55;width:64px;height:92px;
+  display:none;place-items:center;cursor:pointer;border-radius:16px;background:rgba(8,12,20,.58);
+  border:1px solid rgba(251,191,36,.28);backdrop-filter:blur(10px);
+  box-shadow:0 10px 30px -14px rgba(251,191,36,.6);transition:.2s}
+.candle-mini.show{display:grid}
+.candle-mini:hover{transform:translateY(-2px);border-color:rgba(251,191,36,.55)}
+.candle-mini canvas{width:52px;height:74px;display:block}
+.candle-mini .cm-label{position:absolute;bottom:1px;left:0;right:0;text-align:center;font-size:.46rem;
+  color:var(--text2);letter-spacing:.03em}
+html[data-device="phone"] .candle-mini{left:8px;right:auto;bottom:calc(var(--dock-h) + 72px);width:54px;height:80px}
+html[data-device="phone"] .candle-mini canvas{width:44px;height:64px}
+@media(max-width:520px){
+  #dock button{min-width:0!important;flex:1 1 0!important;padding:8px 0!important;gap:0!important}
+  #dock button span{display:none!important}
+  #dock button i{font-size:1rem}
+  #idChip{display:none!important}
+  .topbar>.row{gap:4px!important}
+}
+#view-candle{padding-bottom:110px}
+html[data-fx="off"] .candle-mini{transition:none}
 /* ---- v5.12 · nhãn bộ phận dán theo mô hình 3D ---- */
 .gllabels{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
 .gllabels span{position:absolute;transform:translate(-50%,-118%);padding:2px 8px 2px 6px;border-radius:999px;
@@ -2136,6 +2229,23 @@ html[data-device="phone"] .gllabels span{font-size:.52rem;padding:1px 6px 1px 5p
 html[data-device="phone"] .gllabels span:nth-child(n+4){display:none}
 #labGL{cursor:grab}
 #labGL:active{cursor:grabbing}
+/* ---- v5.13 · tiêu đề cảnh 3D ---- */
+.gltitle{position:absolute;left:50%;top:15%;transform:translate(-50%,-50%);z-index:4;pointer-events:none;
+  font-weight:900;font-size:clamp(.95rem,2.2vw,1.7rem);letter-spacing:.02em;color:#eaf3ff;
+  text-shadow:0 6px 30px rgba(0,0,0,.75);opacity:0;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.gltitle.show{animation:glTitle 2.3s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes glTitle{0%{opacity:0;transform:translate(-50%,-30%) scale(.96)}
+  14%{opacity:.95}68%{opacity:.95}100%{opacity:0;transform:translate(-50%,-72%) scale(1.02)}}
+html[data-theme="light"] .gltitle{color:#0c211a;text-shadow:0 6px 24px rgba(255,255,255,.85)}
+html[data-device="phone"] .gltitle{top:12%;font-size:1rem}
+/* ---- v5.14 · scanline 3D ---- */
+.glscan{position:absolute;inset:0;z-index:2;pointer-events:none;display:none;
+  background:linear-gradient(180deg,transparent 0%,rgba(61,220,151,.05) 46%,rgba(61,220,151,.14) 50%,rgba(61,220,151,.05) 54%,transparent 100%);
+  background-size:100% 220%;animation:scan 6.5s linear infinite;mix-blend-mode:screen;opacity:.55}
+.labstage.gl-on .glscan{display:block}
+@keyframes scan{0%{background-position:0 -120%}100%{background-position:0 220%}}
+html[data-fx="off"] .glscan{display:none!important}
+@media(prefers-reduced-motion:reduce){.glscan{animation:none!important}}
 .glbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px}
 .glbar .tiny{flex:1 1 170px;min-width:0}
 
@@ -2465,6 +2575,9 @@ html[data-gfx="lite"] .qcard,html[data-gfx="lite"] .wcard{border-left:2px solid 
     </button>
     <button class="btn wide" style="margin-bottom:10px" onclick="BG4_TUTOR.open()">
       <i class="fa-solid fa-brain"></i> 🧠 Gia sư AI · giảng lại để biết mình yếu chỗ nào
+    </button>
+    <button class="btn wide" style="margin-bottom:10px" onclick="BG4_DEEP.open()">
+      <i class="fa-solid fa-lightbulb"></i> 💡 Hiểu sâu 7 chuyên đề · cơ chế, bẫy, tự kiểm tra
     </button>
     <div class="stack" id="theoryList"></div>
     <div id="theoryExtra"></div>
@@ -2813,6 +2926,8 @@ html[data-gfx="lite"] .qcard,html[data-gfx="lite"] .wcard{border-left:2px solid 
         <canvas id="labCanvas"></canvas>
         <canvas id="labGL" aria-label="Mô phỏng 3D thí nghiệm"></canvas>
         <div class="gllabels" id="glLabels" aria-hidden="true"></div>
+        <div class="gltitle" id="glTitleFx" aria-hidden="true"></div>
+        <div class="glscan" aria-hidden="true"></div>
         <canvas id="labGhost" class="labghost" aria-hidden="true"></canvas>
         <div class="labhud"><span class="labdot"></span><span>LIVE</span><b id="labHudVal">—</b></div>
         <div class="glcap" id="glCap">WEBGL · 3D</div>
@@ -2823,6 +2938,7 @@ html[data-gfx="lite"] .qcard,html[data-gfx="lite"] .wcard{border-left:2px solid 
 
     <div class="glbar" id="glBar">
       <button class="btn sm" id="glToggle" onclick="BG4_GL.toggle()"><i class="fa-solid fa-cubes"></i> Chế độ 3D</button>
+      <button class="btn sm" id="glTour" onclick="BG4_GL.tour()"><i class="fa-solid fa-shuffle"></i> Tour 3D</button>
       <span class="tiny" id="glMode" style="color:var(--text3)">Đang kiểm tra WebGL…</span>
     </div>
 
@@ -2959,6 +3075,9 @@ html[data-gfx="lite"] .qcard,html[data-gfx="lite"] .wcard{border-left:2px solid 
       </div>
       <button class="btn wide sm" style="margin-top:10px" onclick="BG4_TUTOR.tab('plan');BG4_TUTOR.open()">
         <i class="fa-solid fa-wand-magic-sparkles"></i> Gia sư AI tự gợi ý chỗ cần học
+      </button>
+      <button class="btn wide sm" style="margin-top:7px" onclick="BG4_DEEP.open()">
+        <i class="fa-solid fa-lightbulb"></i> Hiểu sâu 7 chuyên đề
       </button>
     </div>
 
@@ -3246,7 +3365,7 @@ html[data-gfx="lite"] .qcard,html[data-gfx="lite"] .wcard{border-left:2px solid 
       </div>
     </div>
 
-<div class="tiny" style="text-align:center;margin:14px 0">BioGalaxy <b>v5.12</b> • nội dung bám sát SGK Sinh 12</div>
+<div class="tiny" style="text-align:center;margin:14px 0">BioGalaxy <b>v5.14</b> • nội dung bám sát SGK Sinh 12</div>
   </section>
 
 
@@ -3534,25 +3653,63 @@ html[data-gfx="lite"] .qcard,html[data-gfx="lite"] .wcard{border-left:2px solid 
       </div>
     </div>
   </section>
+
+  <!-- ============ NẾN HỌC TẬP ============ -->
+  <section class="view" id="view-candle">
+    <div class="hero">
+      <div class="between" style="align-items:flex-start">
+        <div>
+          <h2>Nến học tập</h2>
+          <p>Chọn thời gian, đốt nến và chỉ học theo ngọn nến. Không có đồng hồ — nến tàn là hết phiên.</p>
+        </div>
+        <i class="fa-solid fa-fire-flame-simple" style="font-size:1.6rem;color:var(--accent);opacity:.55"></i>
+      </div>
+    </div>
+    <div class="candle-stage">
+      <canvas id="candleCanvas" aria-label="Nến đang cháy"></canvas>
+      <div class="candle-status" id="candleStatus">Chọn thời gian rồi bấm bắt đầu</div>
+    </div>
+    <div class="candle-setup" id="candleSetup">
+      <div class="candle-presets" id="candlePresets"></div>
+      <div class="candle-range">
+        <div class="between"><span class="tiny">Thời gian nến</span><b id="candleMinLabel">25 phút</b></div>
+        <input type="range" id="candleRange" min="5" max="120" step="5" value="25" oninput="BG4_CANDLE.setMin(this.value)">
+      </div>
+      <button class="btn pri wide" onclick="BG4_CANDLE.start()"><i class="fa-solid fa-fire"></i> Bắt đầu đốt nến</button>
+    </div>
+    <div class="candle-controls" id="candleControls" style="display:none">
+      <button class="btn" onclick="BG4_CANDLE.pause()" id="candlePause"><i class="fa-solid fa-pause"></i> Tạm dừng</button>
+      <button class="btn" onclick="BG4_CANDLE.stop()"><i class="fa-solid fa-xmark"></i> Tắt nến</button>
+    </div>
+    <div class="candle-summary" id="candleSummary" style="display:none"></div>
+    <div class="tiny" style="margin-top:10px;color:var(--text3)">
+      Nến cháy càng lâu, sáp càng thấp. Khi nến tắt, phiên học kết thúc và được ghi vào chuỗi ngày.
+    </div>
+  </section>
 </div>
 
 <!-- DOCK -->
 <div class="toastwrap" id="toastWrap" aria-live="polite"></div>
 <canvas id="confetti"></canvas>
 
+<div id="candleMini" class="candle-mini" onclick="BG4_CANDLE.openView()" role="button" tabindex="0" aria-label="Nến đang cháy">
+  <canvas id="candleMiniCanvas"></canvas>
+  <span class="cm-label" id="candleMiniLabel">đang cháy</span>
+</div>
 
 <nav class="dock" id="dock">
   <i id="dockInd" aria-hidden="true"></i>
-  <button data-v="theory" class="on" onclick="go('theory')"><i class="fa-solid fa-book-open"></i><span>Lý thuyết</span></button>
-  <button data-v="think" onclick="go('think')"><i class="fa-solid fa-brain"></i><span>Tư duy</span></button>
-  <button data-v="exam" onclick="go('exam')"><i class="fa-solid fa-stopwatch"></i><span>Phòng thi</span></button>
-  <button data-v="lab" onclick="go('lab')"><i class="fa-solid fa-flask-vial"></i><span>Lab</span></button>
-  <button data-v="bank" onclick="go('bank')"><i class="fa-solid fa-database"></i><span>Ngân hàng</span></button>
-  <button data-v="essay" onclick="go('essay')"><i class="fa-solid fa-pen-nib"></i><span>Tự luận</span></button>
-  <button data-v="path" onclick="go('path')"><i class="fa-solid fa-route"></i><span>Lộ trình</span></button>
-  <button data-v="settings" onclick="go('settings')"><i class="fa-solid fa-sliders"></i><span>Cài đặt</span></button>
-  <button data-v="g11" onclick="go('g11')"><i class="fa-solid fa-seedling"></i><span>Ôn 11</span></button>
-  <button data-v="casio" onclick="go('casio')"><i class="fa-solid fa-calculator"></i><span>Casio</span></button>
+  <button data-v="theory" title="Lý thuyết" aria-label="Lý thuyết" class="on" onclick="go('theory')"><i class="fa-solid fa-book-open"></i><span>Lý thuyết</span></button>
+  <button data-v="think" title="Tư duy" aria-label="Tư duy" onclick="go('think')"><i class="fa-solid fa-brain"></i><span>Tư duy</span></button>
+  <button data-v="exam" title="Phòng thi" aria-label="Phòng thi" onclick="go('exam')"><i class="fa-solid fa-stopwatch"></i><span>Phòng thi</span></button>
+  <button data-v="lab" title="Lab" aria-label="Lab" onclick="go('lab')"><i class="fa-solid fa-flask-vial"></i><span>Lab</span></button>
+  <button data-v="bank" title="Ngân hàng" aria-label="Ngân hàng" onclick="go('bank')"><i class="fa-solid fa-database"></i><span>Ngân hàng</span></button>
+  <button data-v="essay" title="Tự luận" aria-label="Tự luận" onclick="go('essay')"><i class="fa-solid fa-pen-nib"></i><span>Tự luận</span></button>
+  <button data-v="path" title="Lộ trình" aria-label="Lộ trình" onclick="go('path')"><i class="fa-solid fa-route"></i><span>Lộ trình</span></button>
+  <button data-v="candle" title="Nến học tập" aria-label="Nến học tập" onclick="go('candle')"><i class="fa-solid fa-fire-flame-simple"></i><span>Nến</span></button>
+  <button data-v="settings" title="Cài đặt" aria-label="Cài đặt" onclick="go('settings')"><i class="fa-solid fa-sliders"></i><span>Cài đặt</span></button>
+  <button data-v="g11" title="Ôn lớp 11" aria-label="Ôn lớp 11" onclick="go('g11')"><i class="fa-solid fa-seedling"></i><span>Ôn 11</span></button>
+  <button data-v="casio" title="Casio" aria-label="Casio" onclick="go('casio')"><i class="fa-solid fa-calculator"></i><span>Casio</span></button>
 </nav>
 
 <!-- ============ MODAL ĐẤU ONLINE NHIỀU NGƯỜI ============ -->
@@ -3634,6 +3791,21 @@ html[data-gfx="lite"] .qcard,html[data-gfx="lite"] .wcard{border-left:2px solid 
       <button class="iconbtn" onclick="BG4_STREAK.close()" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div id="streakBody"></div>
+  </div>
+</div>
+
+<div class="modal hide" id="deepModal">
+  <div class="box" style="max-width:760px;max-height:90vh;overflow-y:auto">
+    <div class="between" style="margin-bottom:10px;gap:8px">
+      <div class="row" style="gap:8px;min-width:0">
+        <div class="logo" style="width:34px;height:34px;flex:0 0 auto"><i class="fa-solid fa-lightbulb"></i></div>
+        <div style="min-width:0"><h3 class="tt">Hiểu sâu 7 chuyên đề</h3>
+          <div class="tiny">Câu chuyện · cơ chế 4 bước · 3 bẫy · tự kiểm tra · sơ đồ</div></div>
+      </div>
+      <button class="iconbtn" onclick="BG4_DEEP.close()" aria-label="Đóng"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="hubtabs" id="deepTabs"></div>
+    <div id="deepBody"></div>
   </div>
 </div>
 
@@ -3995,7 +4167,7 @@ const ACCESS = {
   KEY: 'bg4_mode',
   mode: 'full',
   _loaded: false,
-  BASIC_VIEWS: ['theory', 'exam', 'settings', 'g11'],
+  BASIC_VIEWS: ['theory', 'exam', 'settings', 'g11', 'candle'],
   MCQ_MAX: 10,
   TIME_MAX: 15,
   load: function () {
@@ -4432,12 +4604,17 @@ function go(v) {
       try { toast('i-triangle-exclamation', 'Đã thoát bài thi', 'Bài làm tạm thời không được lưu.', 2600); } catch (e) { }
     }
   }
+  const __prevView = currentView;
   currentView = v;
   beep(540, .035);
   $$('.view').forEach(s => s.classList.toggle('on', s.id === 'view-' + v));
+  const __sec = document.getElementById('view-' + v);
+  if (__sec) { __sec.classList.remove('view-in'); void __sec.offsetWidth; __sec.classList.add('view-in'); }
   $$('#dock button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   syncDockInd();
   if (v === 'lab') requestAnimationFrame(() => { resizeLab(); });
+  if (__prevView === 'candle' && v !== 'candle') { try { BG4_CANDLE.offView(); } catch (e) { } }
+  if (v === 'candle') { try { BG4_CANDLE.onView(); } catch (e) { } }
   if (v === 'bank' && !bankRendered) renderBank(true);
   if (v === 'think' && !thinkRendered) { renderThink(); thinkRendered = true; }
   if (v === 'think' && typeof DIAG !== 'undefined') DIAG.open();
@@ -4921,7 +5098,12 @@ function renderTheory() {
     <details class="acc" ${i === 0 ? 'open' : ''}>
       <summary><i class="fa-solid ${t.icon}" style="color:var(--accent);font-size:.8rem"></i>
         <span>${t.title}</span></summary>
-      <div class="body">${t.body}</div>
+      <div class="body">${t.body}
+        <div class="row" style="gap:7px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn sm" onclick="quickQuiz(${i})"><i class="fa-solid fa-bolt"></i> Kiểm tra nhanh 3 câu</button>
+          <button class="btn sm" onclick="BG4_DEEP.open()"><i class="fa-solid fa-lightbulb"></i> Hiểu sâu</button>
+        </div>
+      </div>
     </details>`).join('');
 
   $('#organelleGrid').innerHTML = ORGANELLES.map(o => `
@@ -5365,6 +5547,7 @@ function gradeExam(auto) {
   parts.forEach(p => { const v = p.r * p.w * (10 / wsum); if (p.k === 'p1') p1 = v; if (p.k === 'p2') p2 = v; if (p.k === 'p3') p3 = v; });
   const score = Math.min(10, Math.max(0, p1 + p2 + p3));
   try { BG4_STREAK.mark('q', exam.mcq.length + exam.tf.length * 4 + exam.short.length); BG4_STREAK.mark('xp', Math.round(score * 12)); } catch (e) { }
+  try { if (score >= 9 && typeof BG4_FX !== 'undefined') BG4_FX.confetti(80); } catch (e) { }
 
   $('#examRoom').style.display = 'none';
   $('#examReport').style.display = '';
@@ -10279,9 +10462,12 @@ function labLoop(ts) {
   if (!w || !h) return;
   labT = ts / 1000;
   labFrame++;
-  labCtx.clearRect(0, 0, w, h);
-  try { LABS[labIdx].draw(labCtx, w, h, labT); } catch (e) { console.warn(e); }
-  labAtmosphere(labCtx, w, h, labT);
+  const glOn = typeof BG4_GL !== 'undefined' && BG4_GL.active() && BG4_GL.ready;
+  if (!glOn) {
+    labCtx.clearRect(0, 0, w, h);
+    try { LABS[labIdx].draw(labCtx, w, h, labT); } catch (e) { console.warn(e); }
+    labAtmosphere(labCtx, w, h, labT);
+  }
   if (typeof BG4_GL !== 'undefined') BG4_GL.frame(labT);
 }
 /* =========================================================
@@ -14194,6 +14380,7 @@ function renderPath() {
   const done = Math.round(tot.rate * 100);
   const due = REV.due().length;
 
+  const st = (typeof BG4_STREAK !== 'undefined') ? BG4_STREAK.status() : { cur: 0, best: 0 };
   const e1 = document.getElementById('pathDone'); if (e1) e1.textContent = done + '%';
   const e2 = document.getElementById('pathStreak'); if (e2) e2.textContent = PROG.d.streak || 0;
   const e3 = document.getElementById('pathDue'); if (e3) e3.textContent = due;
@@ -14223,6 +14410,11 @@ function renderPath() {
   const plan = document.getElementById('pathPlan');
   if (plan) {
     plan.innerHTML =
+      '<h2 class="sec">🔥 Chuỗi ngày học</h2>' +
+      '<div class="card pad-sm"><div class="between"><b>' + st.cur + ' ngày liên tiếp</b>' +
+      '<span class="tiny">Kỷ lục ' + st.best + ' ngày</span></div>' +
+      '<div class="miniheat">' + BG4_STREAK.heat(14).map(function (x) { return '<i class="lv' + x.lv + '"></i>'; }).join('') + '</div>' +
+      '<button class="btn sm wide" onclick="BG4_STREAK.open()">Xem heatmap 35 ngày</button></div>' +
       '<h2 class="sec"><i class="fa-solid fa-triangle-exclamation" style="color:var(--bad)"></i>Chuyên đề cần củng cố</h2>' +
       '<div class="card pad-sm">' + listOf(weak, 'var(--bad)') + '</div>' +
       '<h2 class="sec"><i class="fa-solid fa-circle-check" style="color:var(--ok)"></i>Chuyên đề đã vững</h2>' +
@@ -15215,6 +15407,12 @@ function bg4Tilt(el, maxX, maxY) {
   el.addEventListener('pointermove', function (e) {
     if (document.documentElement.dataset.gfx === 'lite') return;
     if (document.documentElement.dataset.device === 'phone') return;
+    /* v5.13 — 3D đang bật: không nghiêng cả khung, tránh xung đột với kéo xoay mô hình */
+    if (el.classList.contains('gl-on')) {
+      el.style.setProperty('--tilt-x', '0deg');
+      el.style.setProperty('--tilt-y', '0deg');
+      return;
+    }
     if (!rect) rect = el.getBoundingClientRect();
     nx = Math.max(-1, Math.min(1, (e.clientX - rect.left) / rect.width * 2 - 1));
     ny = Math.max(-1, Math.min(1, (e.clientY - rect.top) / rect.height * 2 - 1));
@@ -15233,14 +15431,18 @@ try { bg4Tilt(document.querySelector('#view-lab .labstage'), 3.2, 4.2); } catch 
 function labDrawOnce() {
   if (!labCtx || !labCv._w) return;
   const w = labCv._w, h = labCv._h;
-  labCtx.clearRect(0, 0, w, h);
-  try { LABS[labIdx].draw(labCtx, w, h, labT); } catch (e) { console.warn(e); }
-  labAtmosphere(labCtx, w, h, labT || 0);
+  const glOn = typeof BG4_GL !== 'undefined' && BG4_GL.active() && BG4_GL.ready;
+  if (!glOn) {
+    labCtx.clearRect(0, 0, w, h);
+    try { LABS[labIdx].draw(labCtx, w, h, labT); } catch (e) { console.warn(e); }
+    labAtmosphere(labCtx, w, h, labT || 0);
+  }
   if (typeof BG4_GL !== 'undefined') BG4_GL.frame(labT || 0);
 }
 
 function initV4() {
   try { BG4_ACC.load(); BG4_ACC.paint(); BG4_STREAK.load(); BG4_STREAK.paint(); } catch (e) { console.warn('[v5.12] acc', e); }
+  try { BG4_CANDLE.load(); } catch (e) { console.warn('[v5.14] candle', e); }
   try {
     setInterval(function () {
       if (document.visibilityState !== 'visible' || typeof BG4_STREAK === 'undefined') return;
@@ -18977,7 +19179,7 @@ window.BG4_ACC = BG4_ACC;
 
 /* ---------------- CHUỖI NGÀY HỌC ---------------- */
 const BG4_STREAK = {
-  d: null,
+  d: null, _lastCur: 0,
   load: function () {
     this.d = store.get('streak', null) || { days: {}, cur: 0, best: 0, last: '' };
     if (!this.d.days) this.d.days = {};
@@ -19001,6 +19203,12 @@ const BG4_STREAK = {
     while (keys.length > 180) delete this.d.days[keys.shift()];
     store.set('streak', this.d);
     this.paint();
+    if (this.d.cur !== this._lastCur) {
+      this._lastCur = this.d.cur;
+      if ([3, 7, 14, 30].indexOf(this.d.cur) >= 0 && typeof BG4_FX !== 'undefined') {
+        try { BG4_FX.confetti(56); } catch (e) { }
+      }
+    }
   },
   recalc: function () {
     let cur = 0;
@@ -19075,6 +19283,710 @@ const BG4_STREAK = {
   }
 };
 window.BG4_STREAK = BG4_STREAK;
+
+/* ---------------- HIỆU ỨNG GIAO DIỆN ---------------- */
+const BG4_FX = {
+  colors: ['#3ddc97', '#38bdf8', '#fbbf24', '#fb7185', '#8b7cf6', '#34d399'],
+  confetti: function (n) {
+    try {
+      if (root.dataset.fx === 'off' || root.dataset.fxConfetti === 'off') return;
+    } catch (e) { }
+    const wrap = document.createElement('div');
+    wrap.className = 'confetti';
+    const N = n || 60;
+    for (let i = 0; i < N; i++) {
+      const p = document.createElement('i');
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.background = this.colors[i % this.colors.length];
+      p.style.animationDelay = (Math.random() * .35) + 's';
+      p.style.animationDuration = (1.8 + Math.random() * .9) + 's';
+      p.style.setProperty('--x', ((Math.random() * 2 - 1) * 140).toFixed(0) + 'px');
+      p.style.setProperty('--r', (Math.random() * 720 - 360).toFixed(0) + 'deg');
+      wrap.appendChild(p);
+    }
+    document.body.appendChild(wrap);
+    setTimeout(function () { wrap.remove(); }, 3200);
+  }
+};
+window.BG4_FX = BG4_FX;
+document.addEventListener('pointerdown', function (e) {
+  try {
+    if (root.dataset.fx === 'off') return;
+    const b = e.target.closest('.btn,.iconbtn,.chip,.modecard,.avbtn');
+    if (!b || b.disabled) return;
+    const r = b.getBoundingClientRect();
+    const d = Math.max(r.width, r.height) || 24;
+    const s = document.createElement('span');
+    s.className = 'ripple';
+    s.style.width = s.style.height = d + 'px';
+    s.style.left = (e.clientX - r.left - d / 2) + 'px';
+    s.style.top = (e.clientY - r.top - d / 2) + 'px';
+    b.appendChild(s);
+    setTimeout(function () { s.remove(); }, 640);
+  } catch (x) { }
+}, { passive: true });
+
+/* ============================================================
+   v5.13 — HIỂU SÂU 7 CHUYÊN ĐỀ
+   Câu chuyện → cơ chế 4 bước → 3 bẫy → tự kiểm tra → sơ đồ
+   ============================================================ */
+const DEEP7 = {
+  dt: {
+    n: 'ADN → protein → tính trạng', icon: '🧬',
+    story: 'ADN là cuốn sách hướng dẫn nằm trong nhân, nhưng tế bào không đọc cả cuốn một lúc — nó chỉ mở đúng trang cần dùng, chép ra một bản nháp (mARN) rồi mang bản nháp ra xưởng (ribosome).',
+    steps: [
+      'ADN tách 2 mạch tại gen cần dùng; ARN polymerase lắp từng ribonucleotide theo nguyên tắc bổ sung (A–U, T–A, G–X, X–G).',
+      'mARN mang thông tin ra tế bào chất; cứ 3 nucleotide là một codon.',
+      'Ribosome đọc codon, tRNA mang axit amin tương ứng đến, hình thành chuỗi polypeptide.',
+      'Protein gấp lại thành cấu trúc 3D → thực hiện chức năng → tạo tính trạng.'
+    ],
+    traps: [
+      'Nhầm mạch gốc với mạch bổ sung khi tính số nucleotide / chiều dài.',
+      'Nhầm codon (trên mARN) với anticodon (trên tRNA).',
+      'Quên rằng đột biến thay thế có thể không đổi axit amin vì mã di truyền thoái hoá.'
+    ],
+    quiz: [
+      { q: 'Gen có 3000 nucleotide. Chiều dài?', a: 'L = N/2 × 3,4 Å = 5100 Å = 0,51 µm.' },
+      { q: 'Codon mở đầu ở sinh vật nhân thực?', a: 'AUG — mã hoá methionine.' },
+      { q: 'Đột biến thay 1 cặp nucleotide ở đâu thường ít ảnh hưởng nhất?', a: 'Vùng không mã hoá / intron, hoặc codon thoái hoá vẫn mã hoá axit amin cũ.' }
+    ],
+    map: [
+      { x: 62, y: 120, t: 'ADN' }, { x: 190, y: 78, t: 'mARN' },
+      { x: 320, y: 136, t: 'Ribosome' }, { x: 450, y: 88, t: 'Protein' },
+      { x: 560, y: 128, t: 'Tính trạng' }
+    ]
+  },
+  nst: {
+    n: 'Nhiễm sắc thể & phân bào', icon: '🧵',
+    story: 'NST giống những cuộn chỉ được đánh số. Trước khi chia, tế bào phải photo đủ bộ chỉ rồi xếp từng cuộn về hai cực.',
+    steps: [
+      'Pha S: mỗi NST nhân đôi thành 2 chromatid dính ở tâm động.',
+      'Nguyên phân: NST xếp hàng ở mặt phẳng xích đạo, thoi phân bào gắn vào tâm động.',
+      'Kì sau: chromatid tách ra, mỗi cực nhận một bản.',
+      'Giảm phân: 2 lần chia liên tiếp → 4 tế bào n; kì đầu I có thể trao đổi chéo.'
+    ],
+    traps: [
+      'Nhầm nguyên phân (2 tế bào 2n) với giảm phân (4 tế bào n).',
+      'Nghĩ kì giữa nguyên phân có 4n NST — thực ra là 2n NST kép.',
+      'Quên trao đổi chéo chỉ xảy ra ở kì đầu giảm phân I.'
+    ],
+    quiz: [
+      { q: 'Người 2n = 46. Kì giữa nguyên phân có bao nhiêu NST?', a: '46 NST kép (92 chromatid).' },
+      { q: 'Sau giảm phân I, mỗi tế bào có bộ NST?', a: 'n NST kép.' },
+      { q: 'Trao đổi chéo xảy ra ở?', a: 'Kì đầu I, giữa các chromatid không chị em của cặp tương đồng.' }
+    ],
+    map: [
+      { x: 62, y: 120, t: 'Tế bào mẹ' }, { x: 190, y: 78, t: 'Nhân đôi' },
+      { x: 320, y: 136, t: 'Kì giữa' }, { x: 450, y: 88, t: 'Kì sau' },
+      { x: 560, y: 128, t: '2 tế bào con' }
+    ]
+  },
+  ql: {
+    n: 'Di truyền & xác suất', icon: '🎲',
+    story: 'Bố và mẹ mỗi người góp một “lá thăm” gen. Xác suất con giống bố/mẹ chỉ là bài toán đếm các lá thăm có thể bốc.',
+    steps: [
+      'Xác định kiểu gen của P và các loại giao tử có thể tạo.',
+      'Kẻ bảng Punnett (hoặc nhân xác suất từng cặp gen).',
+      'Đếm tỉ lệ kiểu gen, rồi suy ra tỉ lệ kiểu hình.',
+      'Nếu các gen liên kết, giao tử bị giới hạn bởi nhóm liên kết; có hoán vị thì thêm giao tử tái tổ hợp.'
+    ],
+    traps: [
+      'Nhầm kiểu gen với kiểu hình.',
+      'Quên hệ số 2 của Aa trong phép lai Aa × Aa.',
+      'Coi liên kết gen hoàn toàn giống phân li độc lập.'
+    ],
+    quiz: [
+      { q: 'Aa × Aa → tỉ lệ Aa?', a: '1/2.' },
+      { q: 'AaBb × AaBb (phân li độc lập) → AABB?', a: '1/4 × 1/4 = 1/16.' },
+      { q: 'Liên kết hoàn toàn AB/ab × ab/ab cho đời con?', a: '1 AB/ab : 1 ab/ab (không có Ab, aB).' }
+    ],
+    map: [
+      { x: 62, y: 120, t: 'P' }, { x: 190, y: 78, t: 'Giao tử' },
+      { x: 320, y: 136, t: 'Punnett' }, { x: 450, y: 88, t: 'Tỉ lệ KG' },
+      { x: 560, y: 128, t: 'Tỉ lệ KH' }
+    ]
+  },
+  tv: {
+    n: 'Thực vật', icon: '🌿',
+    story: 'Cây là một nhà máy: rễ hút nước và khoáng, lá lấy ánh sáng, khí khổng là cửa nhận CO₂ và thải O₂.',
+    steps: [
+      'Rễ hút nước và muối khoáng nhờ lông hút, theo cơ chế thẩm thấu và vận chuyển chủ động.',
+      'Mạch gỗ đưa nước + khoáng lên lá; lực hút do thoát hơi nước là động lực chính.',
+      'Khí khổng mở để CO₂ vào, O₂ và hơi nước ra.',
+      'Lục lạp dùng ánh sáng tách nước, tạo ATP/NADPH; pha tối cố định CO₂ thành đường. Mạch rây đưa đường đi nuôi cây.'
+    ],
+    traps: [
+      'Nghĩ CO₂ vào qua rễ — thực ra qua khí khổng ở lá.',
+      'Nghĩ cây chỉ quang hợp ban ngày — hô hấp diễn ra cả ngày đêm.',
+      'Nhầm C3/C4/CAM: C4 tách pha sáng và cố định CO₂ theo không gian; CAM tách theo thời gian (đêm).'
+    ],
+    quiz: [
+      { q: 'Sản phẩm đầu tiên khi C4 cố định CO₂?', a: 'OAA (axit oxaloacetic, 4C).' },
+      { q: 'CAM mở khí khổng khi nào?', a: 'Ban đêm, để giảm mất nước.' },
+      { q: 'Mạch rây vận chuyển chủ yếu?', a: 'Saccarose (và một số chất hữu cơ) từ lá đến nơi dùng.' }
+    ],
+    map: [
+      { x: 62, y: 120, t: 'Rễ' }, { x: 190, y: 78, t: 'Mạch gỗ' },
+      { x: 320, y: 136, t: 'Lá' }, { x: 450, y: 88, t: 'Khí khổng' },
+      { x: 560, y: 128, t: 'Lục lạp' }
+    ]
+  },
+  dv: {
+    n: 'Động vật & nội môi', icon: '❤️',
+    story: 'Cơ thể là một thành phố: tim là trạm bơm, phổi là trạm đổi khí, gan là kho, thận là nhà máy lọc.',
+    steps: [
+      'Tim bơm máu qua động mạch; mao mạch là nơi trao đổi chất.',
+      'Phổi trao đổi O₂/CO₂ qua phế nang; hồng cầu chở O₂.',
+      'Ruột hấp thu dinh dưỡng; gan điều hoà glucose, khử độc, dự trữ glycogen.',
+      'Thận lọc máu, tái hấp thu nước/glucose, thải chất thải; ADH và aldosterone điều chỉnh.'
+    ],
+    traps: [
+      'Nhầm động mạch luôn chở máu giàu O₂ — động mạch phổi chở máu nghèo O₂.',
+      'Nhầm insulin (giảm đường huyết) với glucagon (tăng đường huyết).',
+      'Nghĩ thận chỉ lọc nước — thận còn điều hoà pH, ion, huyết áp.'
+    ],
+    quiz: [
+      { q: 'Insulin làm gì?', a: 'Tăng nhập glucose vào tế bào, tăng dự trữ glycogen → giảm đường huyết.' },
+      { q: 'Trao đổi khí diễn ra ở?', a: 'Phế nang (qua màng phế nang – mao mạch).' },
+      { q: 'ADH tăng khi nào?', a: 'Khi cơ thể mất nước, áp suất thẩm thấu máu tăng.' }
+    ],
+    map: [
+      { x: 62, y: 120, t: 'Tim' }, { x: 190, y: 78, t: 'Phổi' },
+      { x: 320, y: 136, t: 'Máu' }, { x: 450, y: 88, t: 'Gan / Thận' },
+      { x: 560, y: 128, t: 'Cân bằng' }
+    ]
+  },
+  th: {
+    n: 'Tiến hoá & quần thể', icon: '🦋',
+    story: 'Quần thể là một hồ gen. Chọn lọc tự nhiên không “tạo ra” gen mới — nó chỉ làm đổi tần số alen đã có theo thời gian.',
+    steps: [
+      'Biến dị di truyền (đột biến, tái tổ hợp) tạo nguyên liệu.',
+      'Chọn lọc tự nhiên giữ lại kiểu hình thích nghi, loại bỏ kiểu kém thích nghi.',
+      'Tần số alen và kiểu gen thay đổi qua các thế hệ.',
+      'Cách li sinh sản có thể dẫn đến hình thành loài mới.'
+    ],
+    traps: [
+      'Nghĩ cá thể “cố gắng thích nghi” — tiến hoá xảy ra ở quần thể, không phải ý chí cá thể.',
+      'Áp dụng Hardy–Weinberg khi đang có chọn lọc, đột biến, di nhập.',
+      'Nhầm “loài” với “cá thể”.'
+    ],
+    quiz: [
+      { q: 'Đơn vị tiến hoá cơ bản?', a: 'Quần thể.' },
+      { q: 'Hardy–Weinberg: p² + 2pq + q² =?', a: '1.' },
+      { q: 'Bướm Biston đen tăng sau cách mạng công nghiệp vì?', a: 'Chọn lọc tự nhiên ưu tiên kiểu hình đen trên nền cây bị bụi than.' }
+    ],
+    map: [
+      { x: 62, y: 120, t: 'Biến dị' }, { x: 190, y: 78, t: 'Chọn lọc' },
+      { x: 320, y: 136, t: 'Tần số alen' }, { x: 450, y: 88, t: 'Quần thể thích nghi' },
+      { x: 560, y: 128, t: 'Loài mới' }
+    ]
+  },
+  tb: {
+    n: 'Tế bào & bào quan', icon: '🔬',
+    story: 'Tế bào là một xưởng nhỏ: nhân là phòng điều khiển, ti thể là nhà máy điện, ribosome là dây chuyền lắp ráp.',
+    steps: [
+      'Màng sinh chất kiểm soát ra vào, nhận tín hiệu.',
+      'Nhân chứa ADN, điều khiển hoạt động gen.',
+      'Ti thể hô hấp tạo ATP; lục lạp (ở thực vật) quang hợp.',
+      'Ribosome lắp protein; lưới nội chất và Golgi đóng gói, vận chuyển.'
+    ],
+    traps: [
+      'Nhầm chức năng các bào quan (ti thể ↔ lục lạp, ribosome ↔ Golgi).',
+      'Nghĩ ribosome có màng — ribosome không có màng.',
+      'Quên ti thể và lục lạp đều có ADN riêng.'
+    ],
+    quiz: [
+      { q: 'Ti thể tạo ra?', a: 'ATP qua hô hấp tế bào.' },
+      { q: 'Ribosome làm gì?', a: 'Tổng hợp protein từ mARN.' },
+      { q: 'Bào quan nào có ADN?', a: 'Nhân, ti thể, lục lạp.' }
+    ],
+    map: [
+      { x: 62, y: 120, t: 'Màng' }, { x: 190, y: 78, t: 'Nhân' },
+      { x: 320, y: 136, t: 'Ti thể' }, { x: 450, y: 88, t: 'Ribosome' },
+      { x: 560, y: 128, t: 'Golgi' }
+    ]
+  }
+};
+
+const BG4_DEEP = {
+  cur: 'dt',
+  esc: function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  },
+  open: function (t) {
+    this.cur = (t && DEEP7[t]) ? t : (this.cur || 'dt');
+    this.render();
+    const m = document.getElementById('deepModal');
+    if (m) m.classList.remove('hide');
+    try { beep(640, .03); } catch (e) { }
+  },
+  close: function () { const m = document.getElementById('deepModal'); if (m) m.classList.add('hide'); },
+  tab: function (t) { this.cur = t; this.render(); },
+  mapSvg: function (d) {
+    const esc = this.esc;
+    let s = '<svg class="dmap" viewBox="0 0 620 190" role="img" aria-label="Sơ đồ khái niệm">';
+    s += '<defs><marker id="darr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">' +
+      '<path d="M0,0 L7,3.5 L0,7 z" fill="#3ddc97" opacity=".6"/></marker></defs>';
+    for (let i = 1; i < d.map.length; i++) {
+      const a = d.map[i - 1], b = d.map[i];
+      s += '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '" marker-end="url(#darr)"/>';
+    }
+    d.map.forEach(function (n) {
+      s += '<g><rect x="' + (n.x - 52) + '" y="' + (n.y - 20) + '" width="104" height="40" rx="11"/>' +
+        '<text x="' + n.x + '" y="' + (n.y + 4) + '" text-anchor="middle">' + esc(n.t) + '</text></g>';
+    });
+    s += '</svg>';
+    return s;
+  },
+  render: function () {
+    const tabs = document.getElementById('deepTabs');
+    const body = document.getElementById('deepBody');
+    if (!tabs || !body) return;
+    tabs.innerHTML = Object.keys(DEEP7).map(function (k) {
+      const d = DEEP7[k];
+      return '<button class="' + (k === BG4_DEEP.cur ? 'on' : '') + '" onclick="BG4_DEEP.tab(\'' + k + '\')">' + d.icon + ' ' + d.n + '</button>';
+    }).join('');
+    const d = DEEP7[this.cur], esc = this.esc;
+    let h = '<div class="deephero"><span class="dicon">' + d.icon + '</span><div><b>' + esc(d.n) +
+      '</b><p>' + esc(d.story) + '</p></div></div>';
+    h += '<div class="dsteps">' + d.steps.map(function (s, i) {
+      return '<div class="dstep"><i>' + (i + 1) + '</i><span>' + esc(s) + '</span></div>';
+    }).join('') + '</div>';
+    h += '<div class="dgrid2"><div class="dcard bad"><b>⚠️ 3 chỗ hay nhầm</b><ul>' +
+      d.traps.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul></div>';
+    h += '<div class="dcard ok"><b>✅ Tự kiểm tra</b>' + d.quiz.map(function (q, i) {
+      return '<details class="dq"><summary>' + (i + 1) + '. ' + esc(q.q) + '</summary><div>' + esc(q.a) + '</div></details>';
+    }).join('') + '</div></div>';
+    h += '<div class="dmapwrap"><b>🗺️ Sơ đồ khái niệm</b>' + this.mapSvg(d) + '</div>';
+    h += '<button class="btn pri wide" style="margin-top:10px" onclick="BG4_DEEP.practice()">' +
+      '<i class="fa-solid fa-bolt"></i> Luyện 5 câu chủ đề này</button>';
+    body.innerHTML = h;
+  },
+  practice: function () {
+    const t = this.cur;
+    this.close();
+    try {
+      BG4_TUTOR.topicFilter = t; BG4_TUTOR.focusTopic = t;
+      applyPreset(10, 5, 0, 0);
+      go('exam');
+      startExam();
+      BG4_TUTOR.topicFilter = ''; BG4_TUTOR.focusTopic = '';
+      try { toast('i-bullseye', 'Luyện 5 câu', BG4_TUTOR.tname(t), 3000); } catch (e) { }
+    } catch (e) { console.warn('[deep]', e); }
+  }
+};
+window.BG4_DEEP = BG4_DEEP;
+
+/* Gợi ý chuyên đề từ tiêu đề lý thuyết → kiểm tra nhanh 3 câu */
+function theoryTopic(title) {
+  const s = String(title || '').toLowerCase();
+  if (/tái bản|phiên mã|dịch mã|mã di truyền|đột biến gen|adn|arn|protein/.test(s)) return 'dt';
+  if (/tiến hóa|chọn lọc tự nhiên|hình thành loài/.test(s)) return 'th';
+  if (/nst|nhiễm sắc thể|nguyên phân|giảm phân/.test(s)) return 'nst';
+  if (/mendel|di truyền|liên kết|tương tác|giới tính|hoán vị/.test(s)) return 'ql';
+  if (/c3|c4|cam|khí khổng|khoáng|hoocmon|quang hợp|dòng nước|rễ|lá/.test(s)) return 'tv';
+  if (/điện thế|nội môi|gan|đường huyết|thận|tiêu hóa|synapse|tuần hoàn|hô hấp|máu/.test(s)) return 'dv';
+  if (/tế bào|bào quan|màng|ribosome|ti thể|lục lạp/.test(s)) return 'tb';
+  return 'dt';
+}
+function quickQuiz(i) {
+  const th = (typeof THEORY !== 'undefined' && THEORY[i]) ? THEORY[i] : null;
+  const t = th ? theoryTopic(th.title) : 'dt';
+  try {
+    BG4_TUTOR.topicFilter = t; BG4_TUTOR.focusTopic = t;
+    applyPreset(10, 3, 0, 0);
+    go('exam');
+    startExam();
+    BG4_TUTOR.topicFilter = ''; BG4_TUTOR.focusTopic = '';
+    try { toast('i-bullseye', 'Kiểm tra nhanh 3 câu', BG4_TUTOR.tname(t), 3000); } catch (e) { }
+  } catch (e) { console.warn('[quickQuiz]', e); }
+}
+window.theoryTopic = theoryTopic;
+window.quickQuiz = quickQuiz;
+
+/* ============================================================
+   v5.14 — NẾN HỌC TẬP
+   Đốt nến theo thời gian đã chọn; không hiện đồng hồ khi cháy.
+   Nến tàn = hết phiên. Mini nến hiện trên mọi trang.
+   ============================================================ */
+const BG4_CANDLE = {
+  total: 25 * 60000, endAt: 0, left: 25 * 60000,
+  running: false, paused: false, done: false,
+  startedAt: 0, min: 25, _raf: 0, _lastPersist: 0, _lastMin: 0,
+  _doneAt: 0, _viewOpen: false, _lastMini: 0,
+
+  load: function () {
+    let s = null;
+    try { s = store.get('candle', null); } catch (e) { }
+    if (s) {
+      this.total = Math.max(60000, +s.total || 25 * 60000);
+      this.endAt = +s.endAt || 0;
+      this.left = Math.max(0, +s.left || this.total);
+      this.running = !!s.running;
+      this.paused = !!s.paused;
+      this.done = !!s.done;
+      this.startedAt = +s.startedAt || 0;
+      this.min = Math.max(5, Math.min(120, +s.min || Math.round(this.total / 60000)));
+    }
+    if (this.running) {
+      this.left = Math.max(0, this.endAt - Date.now());
+      if (this.left <= 0) this.finish(true);
+    }
+    this.paint();
+    this.raf();
+    return this;
+  },
+  save: function () {
+    try {
+      store.set('candle', {
+        total: this.total, endAt: this.endAt, left: this.left,
+        running: this.running, paused: this.paused, done: this.done,
+        startedAt: this.startedAt, min: this.min
+      });
+    } catch (e) { }
+  },
+  state: function () {
+    return this.done ? 'done' : this.running ? 'running' : this.paused ? 'paused' : 'idle';
+  },
+  progress: function () {
+    return this.total ? Math.max(0, Math.min(1, 1 - this.left / this.total)) : 0;
+  },
+  setMin: function (m) {
+    this.min = Math.max(5, Math.min(120, +m || 25));
+    if (!this.running && !this.paused && !this.done) {
+      this.total = this.min * 60000;
+      this.left = this.total;
+    }
+    this.paintSetup();
+  },
+  start: function () {
+    this.total = this.min * 60000;
+    this.left = this.total;
+    this.endAt = Date.now() + this.total;
+    this.running = true; this.paused = false; this.done = false;
+    this.startedAt = Date.now(); this._lastMin = 0; this._doneAt = 0;
+    this.save(); this.paint(); this.raf();
+    try { toast('i-fire', 'Nến đã được đốt', 'Chỉ cần học theo ngọn nến — không có đồng hồ.', 3200); } catch (e) { }
+  },
+  pause: function () {
+    if (this.running) {
+      this.left = Math.max(0, this.endAt - Date.now());
+      this.running = false; this.paused = true;
+      this.save(); this.paint();
+      try { toast('i-pause', 'Nến tạm dừng', 'Bấm tiếp tục để đốt tiếp.', 2200); } catch (e) { }
+    } else if (this.paused) {
+      this.endAt = Date.now() + this.left;
+      this.running = true; this.paused = false;
+      this.save(); this.paint(); this.raf();
+    }
+  },
+  stop: function () {
+    this.running = false; this.paused = false; this.done = false;
+    this.left = this.total; this.endAt = 0; this._doneAt = 0;
+    this.save(); this.paint();
+    try { toast('i-xmark', 'Đã tắt nến', 'Phiên học kết thúc.', 2200); } catch (e) { }
+  },
+  finish: function (silent) {
+    if (this.done) return;
+    this.running = false; this.paused = false; this.done = true;
+    this.left = 0; this.endAt = 0; this._doneAt = Date.now();
+    this.save();
+    try { BG4_STREAK.mark('xp', Math.max(10, Math.round(this.total / 60000) * 2)); } catch (e) { }
+    if (!silent) {
+      try { beep(520, .12); setTimeout(function () { try { beep(392, .16); } catch (e) { } }, 180); } catch (e) { }
+      try { toast('i-fire', 'Nến đã tàn', 'Phiên học kết thúc — nghỉ một chút nhé.', 4200); } catch (e) { }
+    }
+    this.paint();
+    this.raf();
+    const self = this;
+    setTimeout(function () { self.paint(); }, 8600);
+  },
+  tick: function () {
+    if (!this.running) return;
+    this.left = Math.max(0, this.endAt - Date.now());
+    const burned = Math.floor((this.total - this.left) / 60000);
+    if (burned > this._lastMin) {
+      this._lastMin = burned;
+      try { BG4_STREAK.mark('min', 1); } catch (e) { }
+    }
+    if (this.left <= 0) { this.finish(); return; }
+    if (Date.now() - this._lastPersist > 5000) { this._lastPersist = Date.now(); this.save(); }
+  },
+  raf: function () {
+    if (this._raf) return;
+    const self = this;
+    const loop = function (ts) {
+      self._raf = requestAnimationFrame(loop);
+      self.tick();
+      self.draw(ts / 1000);
+      if (!self.running && !self.paused && !self._viewOpen && !self.miniVisible()) {
+        cancelAnimationFrame(self._raf); self._raf = 0;
+      }
+    };
+    this._raf = requestAnimationFrame(loop);
+  },
+  miniVisible: function () {
+    return this.running || this.paused || (this.done && Date.now() - this._doneAt < 8000);
+  },
+  draw: function (t) {
+    const cv = document.getElementById('candleCanvas');
+    const viewOpen = this._viewOpen || (document.getElementById('view-candle') && document.getElementById('view-candle').classList.contains('on'));
+    if (cv && viewOpen) {
+      const host = cv.parentElement;
+      const r = host.getBoundingClientRect();
+      if (r.width > 4 && r.height > 4) {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const cw = Math.round(r.width * dpr), ch = Math.round(r.height * dpr);
+        if (cv.width !== cw || cv.height !== ch) { cv.width = cw; cv.height = ch; }
+        const ctx = cv.getContext('2d');
+        if (ctx) {
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          candleDraw(ctx, r.width, r.height, this.progress(), t, this.state());
+        }
+      }
+    }
+    const mini = document.getElementById('candleMiniCanvas');
+    const wrap = document.getElementById('candleMini');
+    if (mini && wrap && wrap.classList.contains('show')) {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const mw = 52, mh = 74;
+      const cw = Math.round(mw * dpr), ch = Math.round(mh * dpr);
+      if (mini.width !== cw || mini.height !== ch) { mini.width = cw; mini.height = ch; }
+      const ctx2 = mini.getContext('2d');
+      if (ctx2) {
+        ctx2.setTransform(dpr, 0, 0, dpr, 0, 0);
+        candleDraw(ctx2, mw, mh, this.progress(), t, this.state());
+      }
+    }
+  },
+  paintSetup: function () {
+    const presets = document.getElementById('candlePresets');
+    if (presets) {
+      const opts = [15, 25, 45, 60, 90];
+      presets.innerHTML = opts.map(function (m) {
+        return '<button class="' + (BG4_CANDLE.min === m ? 'on' : '') + '" onclick="BG4_CANDLE.setMin(' + m + ')">' + m + ' phút</button>';
+      }).join('');
+    }
+    const rng = document.getElementById('candleRange');
+    if (rng) rng.value = this.min;
+    const lb = document.getElementById('candleMinLabel');
+    if (lb) lb.textContent = this.min + ' phút';
+  },
+  paint: function () {
+    this.paintSetup();
+    const st = this.state();
+    const setup = document.getElementById('candleSetup');
+    const ctrl = document.getElementById('candleControls');
+    const sum = document.getElementById('candleSummary');
+    const status = document.getElementById('candleStatus');
+    const pause = document.getElementById('candlePause');
+    if (setup) setup.style.display = (st === 'idle') ? '' : 'none';
+    if (ctrl) ctrl.style.display = (st === 'running' || st === 'paused') ? 'flex' : 'none';
+    if (pause) pause.innerHTML = st === 'paused'
+      ? '<i class="fa-solid fa-play"></i> Tiếp tục'
+      : '<i class="fa-solid fa-pause"></i> Tạm dừng';
+    if (status) {
+      status.textContent = st === 'running' ? 'Nến đang cháy'
+        : st === 'paused' ? 'Nến đang tạm dừng'
+          : st === 'done' ? 'Nến đã tàn'
+            : 'Chọn thời gian rồi bấm bắt đầu';
+    }
+    if (sum) {
+      if (st === 'done') {
+        sum.style.display = '';
+        sum.innerHTML = '<b>🔥 Phiên nến đã xong</b><div style="margin-top:4px">Bạn đã đốt hết cây nến ' +
+          this.min + ' phút. Nghỉ mắt một chút rồi quay lại nhé.</div>' +
+          '<button class="btn sm pri" style="margin-top:8px" onclick="BG4_CANDLE.reset()"><i class="fa-solid fa-fire"></i> Đốt cây nến mới</button>';
+      } else {
+        sum.style.display = 'none';
+      }
+    }
+    const wrap = document.getElementById('candleMini');
+    const lab = document.getElementById('candleMiniLabel');
+    if (wrap) wrap.classList.toggle('show', this.miniVisible());
+    if (lab) lab.textContent = st === 'paused' ? 'tạm dừng' : st === 'done' ? 'đã tàn' : 'đang cháy';
+    if (this.miniVisible()) this.raf();
+  },
+  reset: function () {
+    this.done = false; this.running = false; this.paused = false;
+    this.left = this.total; this.endAt = 0; this._doneAt = 0;
+    this.save(); this.paint();
+  },
+  onView: function () {
+    this._viewOpen = true;
+    this.paint();
+    this.raf();
+    try { if (this.state() === 'idle') this.setMin(this.min); } catch (e) { }
+  },
+  offView: function () {
+    this._viewOpen = false;
+  },
+  openView: function () {
+    try { go('candle'); } catch (e) { }
+    this.onView();
+  }
+};
+window.BG4_CANDLE = BG4_CANDLE;
+
+/* Vẽ nến — dùng chung cho khung lớn và mini */
+function candleDraw(ctx, w, h, progress, time, state) {
+  ctx.clearRect(0, 0, w, h);
+  const cx = w / 2;
+  const floorY = h * 0.88;
+  const baseW = Math.min(w * 0.30, 86);
+  const fullH = h * 0.52;
+  const bodyH = Math.max(12, fullH * (1 - progress * 0.82));
+  const bodyX = cx - baseW / 2;
+  const bodyY = floorY - bodyH;
+  const lit = state === 'running' || state === 'paused';
+  const mini = w < 80;
+
+  /* quầng sáng ấm */
+  if (lit) {
+    const g = ctx.createRadialGradient(cx, bodyY - 8, 2, cx, bodyY - 8, Math.max(w, h) * 0.62);
+    g.addColorStop(0, 'rgba(255,190,80,.20)');
+    g.addColorStop(0.38, 'rgba(255,140,40,.07)');
+    g.addColorStop(1, 'rgba(255,100,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  /* mặt bàn */
+  ctx.fillStyle = 'rgba(255,255,255,.045)';
+  ctx.beginPath();
+  ctx.ellipse(cx, floorY + 5, baseW * 1.55, mini ? 4 : 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  /* thân nến */
+  const bg = ctx.createLinearGradient(bodyX, 0, bodyX + baseW, 0);
+  bg.addColorStop(0, '#d9c9a8');
+  bg.addColorStop(0.22, '#fff8e7');
+  bg.addColorStop(0.5, '#f6ead0');
+  bg.addColorStop(0.78, '#e2d1ae');
+  bg.addColorStop(1, '#bda77f');
+  ctx.fillStyle = bg;
+  const r = Math.min(10, baseW * 0.12);
+  ctx.beginPath();
+  ctx.moveTo(bodyX + r, bodyY);
+  ctx.lineTo(bodyX + baseW - r, bodyY);
+  ctx.quadraticCurveTo(bodyX + baseW, bodyY, bodyX + baseW, bodyY + r);
+  ctx.lineTo(bodyX + baseW, floorY - r);
+  ctx.quadraticCurveTo(bodyX + baseW, floorY, bodyX + baseW - r, floorY);
+  ctx.lineTo(bodyX + r, floorY);
+  ctx.quadraticCurveTo(bodyX, floorY, bodyX, floorY - r);
+  ctx.lineTo(bodyX, bodyY + r);
+  ctx.quadraticCurveTo(bodyX, bodyY, bodyX + r, bodyY);
+  ctx.closePath();
+  ctx.fill();
+
+  /* đỉnh sáp chảy */
+  ctx.fillStyle = '#fff8e6';
+  ctx.beginPath();
+  ctx.ellipse(cx, bodyY, baseW / 2, baseW * 0.13, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(196,166,116,.55)';
+  ctx.beginPath();
+  ctx.ellipse(cx, bodyY + 1.5, baseW * 0.36, baseW * 0.08, 0, 0, Math.PI * 2);
+  ctx.fill();
+  /* vệt sáng dọc thân nến */
+  ctx.fillStyle = 'rgba(255,255,255,.20)';
+  ctx.beginPath();
+  ctx.ellipse(bodyX + baseW * 0.25, bodyY + bodyH * 0.45, baseW * 0.075, bodyH * 0.34, 0, 0, Math.PI * 2);
+  ctx.fill();
+  /* phản chiếu ấm trên mặt sáp */
+  if (lit) {
+    ctx.fillStyle = 'rgba(255,190,90,.20)';
+    ctx.beginPath();
+    ctx.ellipse(cx, bodyY - 1, baseW * 0.22, baseW * 0.065, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  /* sáp chảy bên hông */
+  if (!mini) {
+    for (let i = 0; i < 3; i++) {
+      const dx = bodyX + baseW * (0.18 + i * 0.30);
+      const dh = baseW * (0.16 + (i % 2) * 0.10) * (0.65 + progress * 0.35);
+      ctx.fillStyle = 'rgba(255,248,228,.88)';
+      ctx.beginPath();
+      ctx.ellipse(dx, bodyY + dh, baseW * 0.045, dh * 0.72, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  /* bấc */
+  const wickTop = bodyY - (mini ? 4 : 7);
+  ctx.strokeStyle = '#2a2118';
+  ctx.lineWidth = mini ? 1.4 : 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, bodyY - 1);
+  ctx.lineTo(cx, wickTop);
+  ctx.stroke();
+
+  /* ngọn lửa */
+  if (lit) {
+    const flick = state === 'running' ? 1 : 0.42;
+    const fx = cx + Math.sin(time * 7.3) * (mini ? 0.8 : 1.6) * flick;
+    const fh = ((mini ? 18 : 34) + Math.sin(time * 9.1) * (mini ? 2 : 5) + Math.cos(time * 13.7) * (mini ? 1 : 2.5)) * (state === 'running' ? 1 : 0.72);
+    const fw = ((mini ? 7 : 13) + Math.sin(time * 11.3) * (mini ? 0.8 : 1.8)) * (state === 'running' ? 1 : 0.82);
+    const fy = wickTop - 2;
+
+    const gg = ctx.createRadialGradient(fx, fy - fh * 0.3, 1, fx, fy - fh * 0.3, fh * 2.4);
+    gg.addColorStop(0, 'rgba(255,224,130,.50)');
+    gg.addColorStop(0.32, 'rgba(255,150,40,.18)');
+    gg.addColorStop(1, 'rgba(255,90,0,0)');
+    ctx.fillStyle = gg;
+    ctx.beginPath();
+    ctx.arc(fx, fy - fh * 0.3, fh * 2.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(fx, fy - fh);
+    ctx.bezierCurveTo(fx + fw, fy - fh * 0.55, fx + fw * 0.9, fy - fh * 0.12, fx, fy);
+    ctx.bezierCurveTo(fx - fw * 0.9, fy - fh * 0.12, fx - fw, fy - fh * 0.55, fx, fy - fh);
+    const fg = ctx.createLinearGradient(fx, fy - fh, fx, fy);
+    fg.addColorStop(0, '#fffbe8');
+    fg.addColorStop(0.32, '#ffe27a');
+    fg.addColorStop(0.68, '#ff9f2e');
+    fg.addColorStop(1, 'rgba(255,80,10,.88)');
+    ctx.fillStyle = fg;
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,255,242,.92)';
+    ctx.beginPath();
+    ctx.ellipse(fx, fy - fh * 0.46, fw * 0.28, fh * 0.22, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (state === 'running') {
+      for (let i = 0; i < (mini ? 2 : 4); i++) {
+        const ph = (time * 0.7 + i * 0.27) % 1;
+        const sx = fx + Math.sin(time * 3 + i * 2) * fw * 0.8;
+        const sy = fy - fh - ph * fh * 1.7;
+        ctx.fillStyle = 'rgba(255,190,90,' + ((1 - ph) * 0.75).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(sx, sy, mini ? 0.8 : 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  /* khói khi tắt / tạm dừng */
+  if (state === 'done' || state === 'paused') {
+    const st = state === 'done' ? time : time * 0.28;
+    for (let i = 0; i < (mini ? 2 : 5); i++) {
+      const ph = (st * 0.32 + i * 0.18) % 1;
+      const sx = cx + Math.sin(st * 1.4 + i * 1.7) * (mini ? 4 : 10) * ph;
+      const sy = wickTop - ph * (mini ? 26 : 62);
+      ctx.strokeStyle = 'rgba(200,210,220,' + ((1 - ph) * 0.20).toFixed(3) + ')';
+      ctx.lineWidth = mini ? 1.4 : 2.5;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.quadraticCurveTo(sx + Math.sin(st * 2 + i) * 6, sy - 10, sx + Math.sin(st * 1.2 + i) * 4, sy - 22);
+      ctx.stroke();
+    }
+  }
+}
 
 const HUB_ICE = [
   { urls: 'stun:stun.l.google.com:19302' },
@@ -19918,7 +20830,7 @@ const BG4_GL = {
   loc: {}, locFlat: {}, locBg: {}, meshes: {},
   ready: false, failed: false, W: 0, H: 0, dpr: 1, cam: [0, 2, 6],
   orb: { az: .55, el: .20, zoom: 1, drag: false, lx: 0, ly: 0, idle: 0, last: 0 },
-  _scene: -1, _labEls: [], _labelsKey: '', _PV: null,
+  _scene: -1, _labEls: [], _labelsKey: '', _PV: null, time: 0, _switchAt: 0,
 
   active: function () {
     return !this.failed && root.dataset.gfx !== 'lite' && !store.get('gl_force2d', false);
@@ -19933,6 +20845,35 @@ const BG4_GL = {
       toast('i-cubes', !cur ? 'Đổi sang canvas 2D' : 'Đổi sang mô hình 3D',
         root.dataset.gfx === 'lite' ? 'Lite luôn dùng 2D.' : 'Kéo để xoay · lăn chuột để zoom', 2400);
     } catch (e) { }
+  },
+  tour: function () {
+    if (this._tour) {
+      clearInterval(this._tour); this._tour = null;
+      const b = document.getElementById('glTour');
+      if (b) b.innerHTML = '<i class="fa-solid fa-shuffle"></i> Tour 3D';
+      try { toast('i-cubes', 'Đã dừng tour', 'Bấm lại để tự chuyển 23 cảnh.', 2200); } catch (e) { }
+      return;
+    }
+    const self = this;
+    let n = 0;
+    this._tour = setInterval(function () {
+      if (typeof currentView !== 'undefined' && currentView !== 'lab') {
+        clearInterval(self._tour); self._tour = null;
+        const bb = document.getElementById('glTour');
+        if (bb) bb.innerHTML = '<i class="fa-solid fa-shuffle"></i> Tour 3D';
+        return;
+      }
+      selectLab((labIdx + 1) % 23);
+      n++;
+      if (n >= 23) {
+        clearInterval(self._tour); self._tour = null;
+        const b = document.getElementById('glTour');
+        if (b) b.innerHTML = '<i class="fa-solid fa-shuffle"></i> Tour 3D';
+      }
+    }, 4200);
+    const b = document.getElementById('glTour');
+    if (b) b.innerHTML = '<i class="fa-solid fa-stop"></i> Dừng tour';
+    try { toast('i-cubes', 'Tour 3D', 'Tự chuyển 23 thí nghiệm, mỗi cảnh 4,2 giây.', 2600); } catch (e) { }
   },
   syncMode: function () {
     const on = this.active() && this.ready;
@@ -20239,11 +21180,19 @@ const BG4_GL = {
     this.syncMode();
     if (!on || !this.W || !this.H) return;
     const gl = this.gl, light = root.dataset.theme === 'light';
+    this.time = t;
     if (this._scene !== labIdx) {
       const sc0 = GL_SCENES[labIdx] || GL_SCENES[0];
       this._scene = labIdx; this.orb.az = sc0.az == null ? .55 : sc0.az;
       this.orb.el = sc0.el == null ? .20 : sc0.el; this.orb.zoom = 1;
-      this._labEls = []; this._labelsKey = '';
+      this._labEls = []; this._labelsKey = ''; this._switchAt = t;
+      const fx = document.getElementById('glTitleFx');
+      if (fx) {
+        fx.textContent = sc0.name;
+        fx.classList.remove('show');
+        void fx.offsetWidth;
+        fx.classList.add('show');
+      }
     }
     /* nền gradient + vignette */
     gl.disable(gl.DEPTH_TEST); gl.depthMask(false); gl.disable(gl.CULL_FACE); gl.disable(gl.BLEND);
@@ -20267,8 +21216,10 @@ const BG4_GL = {
     this.orb.last = t;
     if (!this.orb.drag) { this.orb.idle += dt; if (this.orb.idle > 2.0) this.orb.az += dt * .13; }
     const target = scene.target || [0, .05, 0];
-    const dist = (scene.zoom || 5.6) * this.orb.zoom;
-    const el = this.orb.el, az = this.orb.az;
+    const intro = Math.min(1, Math.max(0, (t - this._switchAt) / .8));
+    const ie = 1 - Math.pow(1 - intro, 3);
+    const dist = (scene.zoom || 5.6) * (1.16 - .16 * ie) * this.orb.zoom;
+    const el = this.orb.el + Math.sin(t * .33) * .012, az = this.orb.az;
     const eye = [
       target[0] + Math.sin(az) * Math.cos(el) * dist,
       target[1] + Math.sin(el) * dist,
@@ -20296,6 +21247,27 @@ const BG4_GL = {
         }
       }
     }
+    /* v5.13 — bụi sáng + vòng accent cho cảnh có hồn */
+    const accent = scene.accent || GL_HUE[labIdx % GL_HUE.length];
+    if (scene.amb !== false) {
+      const na = scene.amb == null ? 16 : scene.amb;
+      for (let i = 0; i < na; i++) {
+        const ph = (t * .055 + i * .137) % 1;
+        const x = Math.sin(i * 2.4 + t * .18) * 2.3;
+        const z = Math.cos(i * 1.7 + t * .14) * 1.5;
+        const y = -1.2 + ph * 2.9;
+        this.add(objs, 'sph', accent, x, y, z, .012, .012, .012, { alpha: .16 + (i % 3) * .05 });
+      }
+      /* bokeh lớn, mờ — tạo chiều sâu */
+      for (let i = 0; i < 6; i++) {
+        const ph = (t * .03 + i * .17) % 1;
+        const x = Math.sin(i * 1.9 + t * .08) * 2.6;
+        const z = Math.cos(i * 2.3 + t * .07) * 1.7;
+        const y = -.8 + ph * 2.4;
+        this.add(objs, 'sph', accent, x, y, z, .055, .055, .055, { alpha: .05 });
+      }
+    }
+    this.add(objs, 'torus', accent, 0, -1.386, 0, 3.1, 1, 3.1, { alpha: .10 });
     /* bóng đổ mềm */
     gl.useProgram(this.progFlat);
     gl.uniformMatrix4fv(this.locFlat.P, false, new Float32Array(P));
@@ -20314,6 +21286,19 @@ const BG4_GL = {
     /* vật đục */
     gl.useProgram(this.prog);
     for (let i = 0; i < objs.length; i++) if (objs[i].alpha == null || objs[i].alpha >= .98) this.drawOne(objs[i]);
+    /* v5.14 — quầng sáng cộng thêm cho vật phát sáng */
+    const glows = objs.filter(function (o) { return o.glow; });
+    if (glows.length) {
+      gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE); gl.depthMask(false);
+      for (let i = 0; i < glows.length; i++) {
+        const g = glows[i];
+        this.drawOne(Object.assign({}, g, {
+          alpha: .13, e: 1,
+          sx: (g.sx || 1) * 1.7, sy: (g.sy || 1) * 1.7, sz: (g.sz || 1) * 1.7
+        }));
+      }
+      gl.depthMask(true); gl.disable(gl.BLEND);
+    }
     /* vật trong suốt */
     const tr = objs.filter(function (o) { return o.alpha != null && o.alpha < .98; });
     if (tr.length) {
@@ -20334,7 +21319,19 @@ const BG4_GL = {
   drawOne: function (o) {
     const gl = this.gl, b = this.meshes[o.m];
     if (!b) return;
-    const m = o.mat ? o.mat : this.trs(o);
+    let oo = o;
+    if (o.bob || o.spin || o.pulse) {
+      oo = Object.assign({}, o);
+      if (o.bob) oo.y = (o.y || 0) + Math.sin(this.time * 1.5 + (o.ph || 0)) * o.bob;
+      if (o.spin) oo.ry = (o.ry || 0) + this.time * o.spin;
+      if (o.pulse) {
+        const k = 1 + Math.sin(this.time * 2.1 + (o.ph || 0)) * o.pulse;
+        oo.sx = (o.sx == null ? 1 : o.sx) * k;
+        oo.sy = (o.sy == null ? 1 : o.sy) * k;
+        oo.sz = (o.sz == null ? 1 : o.sz) * k;
+      }
+    }
+    const m = o.mat ? o.mat : this.trs(oo);
     gl.uniformMatrix4fv(this.loc.M, false, new Float32Array(m));
     gl.uniform3fv(this.loc.C, new Float32Array(o.c));
     gl.uniform1f(this.loc.E, o.e || 0);
@@ -20387,6 +21384,7 @@ const GL_C = {
 function glAdd(o, m, c, x, y, z, sx, sy, sz, e, extra) {
   const ob = { m: m, c: c, x: x, y: y, z: z, sx: sx, sy: sy, sz: sz, e: e || 0 };
   if (extra) Object.assign(ob, extra);
+  if ((ob.bob || ob.pulse) && ob.ph == null) ob.ph = x * 1.7 + y * 2.3 + z * 3.1;
   o.push(ob);
 }
 function glRing(o, m, c, cx, cy, cz, r, n, size, t, e) {
@@ -20410,7 +21408,7 @@ function glLeaf(o, c, x, y, z, s, ry, rz, e) {
     { ry: ry || 0, rz: (rz || 0) + Math.PI / 2 });
 }
 function glSun(o, x, y, z, r, t) {
-  glAdd(o, 'sph', GL_C.yellow, x, y, z, r, r, r, 1.0);
+  glAdd(o, 'sph', GL_C.yellow, x, y, z, r, r, r, 1.0, { glow: 1 });
   glAdd(o, 'sph', [1, .80, .30], x, y, z, r * 1.22, r * 1.22, r * 1.22, .5, { alpha: .18 });
   glAdd(o, 'sph', [1, .86, .40], x, y, z, r * 1.48, r * 1.48, r * 1.48, .3, { alpha: .08 });
   for (let i = 0; i < 8; i++) {
@@ -20729,7 +21727,7 @@ const GL_SCENES = [
         glAdd(o, 'box', [.36, .66, .32], cx, -.40, 0, 1.55, .10, 1.15, .02, { alpha: .55 });
         for (let i = 0; i < 6; i++) {
           const x = cx - .62 + i * .25;
-          glAdd(o, 'sph', [.30, .72, .34], x, .16, 0, .11, .24, .11, .04, { sh: .12 });
+          glAdd(o, 'sph', [.30, .72, .34], x, .16, 0, .11, .24, .11, .04, { sh: .12, pulse: .10 });
         }
         for (let i = 0; i < 8; i++) {
           const x = cx - .66 + i * .19;
@@ -20741,12 +21739,17 @@ const GL_SCENES = [
           for (let i = 0; i < 8; i++) {
             const a = i * Math.PI / 4;
             glAdd(o, 'sph', [.86, .74, .30], cx + Math.cos(a) * .28, -.28 + Math.sin(a) * .24, 0,
-              .12, .12, .12, .05);
+              .12, .12, .12, .05, { pulse: .12 });
           }
         }
       };
       slab(-1.25, false); slab(1.25, true);
       glAdd(o, 'box', [.85, .88, .82], 0, 0, 0, .035, .80, 1.10, 0);
+      for (let i = 0; i < 10; i++) {
+        const ph = (t * .22 + i * .11) % 1;
+        glAdd(o, 'sph', [.95, .55, .22], -1.9 + ph * 3.8, -.05 + Math.sin(i * 1.7) * .18, .30,
+          .035, .035, .035, .45, { alpha: .85 });
+      }
     },
     labels: function () {
       return [
@@ -20959,12 +21962,12 @@ const GL_SCENES = [
   /* 10 — NGUYÊN PHÂN */
   { name: 'Nguyên phân', zoom: 4.5, target: [0, 0, 0],
     build: function (o, t, v) {
-      const ph = (t * .14) % 1;
+      const ph = (t * .30) % 1;
       const sep = ph < .42 ? 0 : Math.min(1, (ph - .42) / .5);
       glAdd(o, 'sph', [.20, .72, .86], 0, 0, 0, 1.30, 1.22, 1.18, .10, { alpha: .12 });
       glAdd(o, 'sph', [.55, .40, .92], 0, 0, 0, .72, .70, .68, .08, { alpha: .12 });
-      glAdd(o, 'sph', [.44, .30, .78], -1.05, 0, 0, .12, .12, .12, .10);
-      glAdd(o, 'sph', [.44, .30, .78], 1.05, 0, 0, .12, .12, .12, .10);
+      glAdd(o, 'sph', [.44, .30, .78], -1.05, 0, 0, .12, .12, .12, .10, { pulse: .22 });
+      glAdd(o, 'sph', [.44, .30, .78], 1.05, 0, 0, .12, .12, .12, .10, { pulse: .22 });
       for (let i = 0; i < 4; i++) {
         const x0 = -.34 + i * .22, z = (i % 2 ? .34 : -.34) + (i < 2 ? -.10 : .10);
         const x = x0 * (1 + sep * 1.9) + (i < 2 ? -sep * .55 : sep * .55);
@@ -20990,13 +21993,18 @@ const GL_SCENES = [
         glChromosome(o, cx + .16, .18, .04, .95, c2, 0, t);
         glSeg(o, [.95, .85, .40], [cx - .30, .52, .02], [cx + .30, .52, .02], .025, .25);
         glSeg(o, [.95, .85, .40], [cx - .30, -.16, .02], [cx + .30, -.16, .02], .025, .25);
-        glAdd(o, 'sph', [.95, .80, .35], cx, .35, .06, .06, .06, .06, .7);
+        glAdd(o, 'sph', [.95, .80, .35], cx, .35, .06, .06, .06, .06, .7, { pulse: .35, glow: 1 });
       };
       pair(-1.05, [.62, .30, .86], [.30, .50, .90]);
       pair(1.05, [.90, .34, .40], [.30, .70, .52]);
+      for (let i = 0; i < 12; i++) {
+        const a = i * 1.7 + t * .35;
+        glAdd(o, 'sph', [.95, .85, .40], Math.cos(a) * 1.55, .55 + Math.sin(a * 1.3) * .45, Math.sin(a) * .55,
+          .032, .032, .032, .40, { alpha: .8 });
+      }
       /* 4 tế bào con */
       [[-1.85, -.85], [-.55, -1.0], [.55, -1.0], [1.85, -.85]].forEach(function (p, i) {
-        glAdd(o, 'sph', [.20, .72, .86], p[0], p[1], .35, .30, .30, .30, .08, { alpha: .18 });
+        glAdd(o, 'sph', [.20, .72, .86], p[0], p[1], .35, .30, .30, .30, .08, { alpha: .18, bob: .04 });
         glAdd(o, 'sph', i % 2 ? [.62, .30, .86] : [.90, .34, .40], p[0] - .07, p[1], .35, .10, .10, .10, .10);
         glAdd(o, 'sph', [.30, .50, .90], p[0] + .07, p[1], .35, .10, .10, .10, .10);
       });
@@ -21016,7 +22024,7 @@ const GL_SCENES = [
       glDNA(o, 1.35, .52, 0, 2.0, 1.3, .32, t * 1.1, [.10, .78, .92], [.90, .80, .30]);
       glDNA(o, 1.35, -.52, 0, 2.0, 1.3, .32, t * 1.1, [.58, .38, .94], [.90, .80, .30]);
       /* helicase */
-      glAdd(o, 'torus', GL_C.orange, .05, 0, 0, .34, .34, .34, .55, { rz: Math.PI / 2, rx: .2 });
+      glAdd(o, 'torus', GL_C.orange, .05, 0, 0, .34, .34, .34, .55, { rz: Math.PI / 2, rx: .2, glow: 1 });
       glAdd(o, 'sph', [.95, .62, .20], .05, 0, 0, .20, .20, .20, .40, { alpha: .35 });
       for (let i = 0; i < 12; i++) {
         const a = i * 1.6 + t * .4;
@@ -21172,20 +22180,20 @@ const GL_SCENES = [
   /* 17 — MENĐEN: BẢNG PUNNETT */
   { name: 'Menđen — bảng Punnett', zoom: 4.4, el: 0.46, target: [0, -.25, 0],
     build: function (o, t, v) {
-      glAdd(o, 'box', [.86, .88, .82], 0, -.62, 0, 2.75, .12, 2.75, .02, { sh: 1.6 });
+      glAdd(o, 'box', [.86, .88, .82], 0, -.62, 0, 2.75, .12, 2.75, .02, { sh: 1.6, bob: .006 });
       const cells = [[-1, -1], [1, -1], [-1, 1], [1, 1]];
       cells.forEach(function (c, i) {
         const dom = i === 0 ? 2 : i === 3 ? 0 : 1;
         const col = dom === 2 ? [.30, .74, .38] : dom === 0 ? [1, .58, .16] : [.72, .74, .34];
-        glAdd(o, 'box', col, c[0] * .66, -.55, c[1] * .66, 1.18, .06, 1.18, .03);
+        glAdd(o, 'box', col, c[0] * .66, -.55, c[1] * .66, 1.18, .06, 1.18, .03, { pulse: .018, ph: i * 1.3 });
         for (let k = 0; k < 2; k++) {
           glAdd(o, 'sph', k < dom ? [.24, .68, .32] : [1, .55, .12],
-            c[0] * .66 - .20 + k * .40, -.46, c[1] * .66, .14, .14, .14, .10, { sh: .16 });
+            c[0] * .66 - .20 + k * .40, -.46, c[1] * .66, .14, .14, .14, .10, { sh: .16, bob: .035, ph: i * 2 + k });
         }
       });
       /* giao tử bố/mẹ */
       [[-1.72, -1, [.24, .68, .32]], [-1.72, 1, [1, .55, .12]], [-1, -1.72, [.24, .68, .32]], [1, -1.72, [1, .55, .12]]].forEach(function (g) {
-        glAdd(o, 'sph', g[2], g[0], -.44, g[1], .16, .16, .16, .12, { sh: .18 });
+        glAdd(o, 'sph', g[2], g[0], -.44, g[1], .16, .16, .16, .12, { sh: .18, bob: .045 });
       });
     },
     labels: function () {
@@ -21200,7 +22208,7 @@ const GL_SCENES = [
   { name: 'Liên kết giới tính', zoom: 4.7, target: [0, 0, 0],
     build: function (o, t, v) {
       glChromosome(o, -1.15, .25, 0, 1.55, [.95, .48, .62], 0, t);
-      glAdd(o, 'sph', [1, .88, .30], -1.32, .62, .18, .10, .10, .10, .95);
+      glAdd(o, 'sph', [1, .88, .30], -1.32, .62, .18, .10, .10, .10, .95, { pulse: .35, glow: 1 });
       glAdd(o, 'torus', [1, .82, .25], -1.32, .62, .18, .22, .22, .22, .5, { rx: 1.2, alpha: .35 });
       /* Y nhỏ hơn */
       glSeg(o, [.30, .50, .92], -.10, -.35, 0, .13, .04);
@@ -21208,9 +22216,14 @@ const GL_SCENES = [
       glSeg(o, [.30, .50, .92], [.18, -.10, 0], [.34, -.55, 0], .11, .04);
       /* bảng 2x2 bên phải */
       glAdd(o, 'box', [.86, .88, .82], 1.45, -.62, 0, 1.65, .10, 1.65, .02, { sh: .9 });
+      for (let i = 0; i < 8; i++) {
+        const a = i * 1.5 + t * .3;
+        glAdd(o, 'sph', [.95, .70, .80], Math.cos(a) * 1.6, .30 + Math.sin(a * 1.4) * .55, Math.sin(a) * .5,
+          .03, .03, .03, .35, { alpha: .8 });
+      }
       for (let i = 0; i < 4; i++) {
         const x = 1.45 + (i % 2 ? .38 : -.38), z = (i < 2 ? -.38 : .38);
-        glAdd(o, 'box', i % 2 ? [.86, .62, .72] : [.42, .60, .92], x, -.55, z, .70, .05, .70, .02);
+        glAdd(o, 'box', i % 2 ? [.86, .62, .72] : [.42, .60, .92], x, -.55, z, .70, .05, .70, .02, { pulse: .02, ph: i });
         glAdd(o, 'sph', i % 2 ? [.95, .48, .62] : [.30, .50, .92], x, -.46, z, .11, .11, .11, .08);
       }
     },
@@ -21260,7 +22273,12 @@ const GL_SCENES = [
       for (let i = 0; i < 7; i++) {
         const isDark = i / 7 < dark;
         const x = -.55 + (i % 3) * .55, y = -.85 + i * .30, z = .0;
-        glButterfly(o, x, y, z, isDark ? [.18, .20, .24] : [.92, .92, .86], t * 2 + i, .85);
+        glButterfly(o, x + Math.sin(t * .7 + i) * .04, y + Math.cos(t * .9 + i) * .03, z, isDark ? [.18, .20, .24] : [.92, .92, .86], t * 2 + i, .85);
+      }
+      for (let i = 0; i < 10; i++) {
+        const a = i * 1.9 + t * .25;
+        glAdd(o, 'sph', [.95, .88, .55], Math.cos(a) * 1.5, -.5 + Math.sin(a * 1.2) * .9, .25 + Math.sin(a) * .3,
+          .028, .028, .028, .35, { alpha: .75 });
       }
     },
     labels: function (t, v) {
@@ -21309,31 +22327,36 @@ const GL_SCENES = [
         glSeg(o, GL_C.bark, [0, -.55, 0], [p[0] * .55, -.10, 0], .06, .02);
         glSeg(o, GL_C.bark, [p[0] * .55, -.10, 0], [p[0], p[1] - .12, 0], .045, .02);
         if (i === 0) { /* cá */
-          glAdd(o, 'sph', p[2], p[0], p[1], 0, .26, .14, .12, .08, { sh: .25 });
+          glAdd(o, 'sph', p[2], p[0], p[1], 0, .26, .14, .12, .08, { sh: .25, bob: .03, ph: i });
           glAdd(o, 'cone', p[2], p[0] + .28, p[1], 0, .12, .20, .10, .06, { rz: -Math.PI / 2 });
         } else if (i === 1) { /* ếch */
-          glAdd(o, 'sph', p[2], p[0], p[1], 0, .20, .15, .18, .06, { sh: .2 });
+          glAdd(o, 'sph', p[2], p[0], p[1], 0, .20, .15, .18, .06, { sh: .2, bob: .03, ph: i });
           glAdd(o, 'sph', p[2], p[0] - .16, p[1] - .10, .12, .08, .06, .08, .04);
           glAdd(o, 'sph', p[2], p[0] + .16, p[1] - .10, .12, .08, .06, .08, .04);
         } else if (i === 2) { /* bò sát */
-          glAdd(o, 'sph', p[2], p[0], p[1], 0, .30, .11, .13, .06, { sh: .2 });
+          glAdd(o, 'sph', p[2], p[0], p[1], 0, .30, .11, .13, .06, { sh: .2, bob: .03, ph: i });
           glSeg(o, p[2], [p[0] + .26, p[1], 0], [p[0] + .55, p[1] - .05, .12], .035, .02);
         } else if (i === 3) { /* chim */
-          glAdd(o, 'sph', p[2], p[0], p[1], 0, .18, .14, .16, .06, { sh: .2 });
+          glAdd(o, 'sph', p[2], p[0], p[1], 0, .18, .14, .16, .06, { sh: .2, bob: .03, ph: i });
           glAdd(o, 'sph', [.95, .95, .95], p[0] - .16, p[1] + .02, .10, .18, .05, .12, .04, { rz: .5 });
           glAdd(o, 'sph', [.95, .95, .95], p[0] + .16, p[1] + .02, .10, .18, .05, .12, .04, { rz: -.5 });
         } else if (i === 4) { /* thú */
-          glAdd(o, 'sph', p[2], p[0], p[1], 0, .28, .16, .15, .06, { sh: .2 });
+          glAdd(o, 'sph', p[2], p[0], p[1], 0, .28, .16, .15, .06, { sh: .2, bob: .03, ph: i });
           glAdd(o, 'sph', p[2], p[0] + .24, p[1] + .08, 0, .12, .12, .12, .05);
           glSeg(o, p[2], [p[0] - .12, p[1] - .10, 0], [p[0] - .14, p[1] - .28, 0], .035, 0);
           glSeg(o, p[2], [p[0] + .12, p[1] - .10, 0], [p[0] + .14, p[1] - .28, 0], .035, 0);
         } else { /* người */
-          glAdd(o, 'sph', GL_C.skin, p[0], p[1] + .10, 0, .10, .11, .10, .04);
-          glAdd(o, 'sph', [.30, .50, .92], p[0], p[1] - .10, 0, .11, .16, .09, .03);
+          glAdd(o, 'sph', GL_C.skin, p[0], p[1] + .10, 0, .10, .11, .10, .04, { bob: .03, ph: i });
+          glAdd(o, 'sph', [.30, .50, .92], p[0], p[1] - .10, 0, .11, .16, .09, .03, { bob: .03, ph: i });
           glSeg(o, GL_C.dark, [p[0] - .05, p[1] - .24, 0], [p[0] - .05, p[1] - .40, 0], .035, 0);
           glSeg(o, GL_C.dark, [p[0] + .05, p[1] - .24, 0], [p[0] + .05, p[1] - .40, 0], .035, 0);
         }
       });
+      for (let i = 0; i < 12; i++) {
+        const a = i * 1.8 + t * .22;
+        glAdd(o, 'sph', [.95, .85, .45], Math.cos(a) * 2.0, -.45 + Math.sin(a * 1.1) * 1.0, Math.sin(a) * .6,
+          .03, .03, .03, .35, { alpha: .8 });
+      }
     },
     labels: function () {
       return [

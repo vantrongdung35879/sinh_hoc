@@ -2,7 +2,7 @@
 
 Ứng dụng học tập Sinh học 12 chạy hoàn toàn trên trình duyệt (GitHub Pages), gồm **ứng dụng học sinh** (`sinh.html`), **bảng quản trị** (`admin.html`), **cổng vào** (`index.html`) và công cụ build icon (`_ins_sprite.js`).
 
-Phiên bản tài liệu: **v5.12** · Năm học: **2026–2027**.
+Phiên bản tài liệu: **v5.14** · Năm học: **2026–2027**.
 
 ---
 
@@ -92,6 +92,73 @@ có ô tìm kiếm toàn văn. Các câu phụ thuộc hình ảnh trong bản g
 - **Mini-game khủng long** (Canvas 2D thuần, không CDN): bầu trời đêm có sao/trăng/mây, đồi xa, xương rồng, khủng long nhảy bằng Space / ↑ / chạm, **3 mạng**, điểm tăng dần, bụi khi mất mạng, màn hình hết mạng, nút Chơi lại. Tự dừng khi vào trận / ẩn tab / tắt hiệu ứng nặng.
 - Lab: thêm lớp phản xạ kính và ánh sáng đỉnh cho khung thí nghiệm (tắt trên điện thoại để đỡ tải GPU).
 - Dock 10 tab trên điện thoại cuộn ngang, vẫn hiện nhãn, thanh chỉ thị tự căn theo tab đang chọn.
+
+## 3i. v5.14 — Nến học tập + mini nến toàn trang + 3D lung linh hơn
+
+### 1. Nến học tập
+- Tab **Nến** trên dock: chọn 15/25/45/60/90 phút hoặc kéo 5–120 phút, bấm **Bắt đầu đốt nến**.
+- Nến cháy từ từ: sáp thấp dần, lửa rung, sáp chảy, tàn lửa + khói khi hết.
+- **Không hiện đồng hồ** trong lúc cháy — chỉ có trạng thái “Nến đang cháy”; người học không bị ám ảnh thời gian.
+- Tạm dừng / tiếp tục / tắt nến; khi nến tàn có tóm tắt phiên và nút đốt cây mới.
+- Mỗi phút cháy được ghi vào chuỗi ngày; hết nến thưởng XP.
+
+### 2. Mini nến trên mọi trang
+- Sau khi bắt đầu, một **mini nến** xuất hiện ở góc trái trên mọi tab (Lý thuyết, Lab, Ngân hàng, Lộ trình…), chỉ có lửa + mức sáp, **không có số thời gian**.
+- Bấm mini nến để quay lại tab Nến.
+- Trạng thái: đang cháy / tạm dừng / đã tàn; reload vẫn tiếp tục đúng thời điểm (lưu `endAt`).
+
+### 3. 3D lung linh hơn
+- **Scanline hologram** chạy chậm trên khung 3D.
+- **Bokeh** lớn mờ + bụi sáng tạo chiều sâu.
+- **Quầng sáng cộng thêm** (additive glow) cho helicase, locus gen, chiasma, mặt trời.
+- Vẫn giữ 23/23 cảnh động, tour 3D, nhãn bộ phận.
+
+### 4. Sửa lỗi
+- **Dock 11 tab bị tràn 264px trên phone** → icon-only trên phone, có tooltip; desktop vẫn đủ nhãn.
+- Nến không hiện số thời gian; mini nến dời sang trái để không bị toast che.
+- Dừng vòng RAF khi nến tắt và mini đã ẩn (không tốn CPU).
+
+### 5. Kiểm chứng
+- 11 view + 23 lab + đề + 5 modal: 0 exception.
+- Nến: start → mini trên tab khác → pause → stop → finish; reload vẫn chạy tiếp; không có `\d+:\d+` trong trạng thái.
+- 4 viewport: dock 11 tab không tràn; nến vừa màn hình.
+- `sinh.html` 1655 KB (gzip **460 KB**).
+
+## 3h. v5.13 — Sửa hoạt ảnh, 3D sống động, hiểu sâu, hiệu ứng giao diện
+
+### 1. Sửa lỗi hoạt ảnh thật
+- **Vẽ trùng 2D + 3D**: mỗi khung hình trước đây vừa vẽ canvas 2D (đang ẩn) vừa vẽ WebGL → tốn gấp đôi, 3D giật. Giờ khi 3D bật, chỉ vẽ WebGL.
+- **Nghiêng khung tranh chồng lên kéo xoay 3D**: `bg4Tilt` vẫn xoay cả `.labstage` khi đang orbit → mô hình và nhãn bị lắc. Giờ tắt tilt khi `gl-on`.
+- **Vòng accent bị dựng đứng** thành “vòm xanh” sau bàn Punnett → sửa nằm phẳng trên sàn.
+- **Bản đồ khái niệm bị cắt** trong modal Hiểu sâu → bước 2 cột + viewBox gọn.
+- **Mini heatmap quá to** ở Lộ trình → giới hạn 320px.
+- **Ánh xạ chuyên đề** của “Kiểm tra nhanh” sai với “Dịch mã” → ưu tiên nhóm ADN→protein trước.
+
+### 2. 3D sống động hơn
+- **Chuyển cảnh có zoom-in** + **tiêu đề cảnh** hiện rồi tan.
+- **Bụi sáng** bay lơ lửng + **vòng accent** trên sàn cho mọi cảnh.
+- **23/23 cảnh có chuyển động**: thêm `bob` (nhấp nhô), `pulse` (phồng nhẹ), `spin` (xoay chậm) cho vật thể; 7 cảnh trước đây đứng yên nay có nhịp: C3/C4 có CO₂ bay, nguyên phân tách NST nhanh hơn, giảm phân có bụi và chiasma phát sáng, Punnett có ô nhấp nhô + hạt gen nhún, X/Y có locus phát sáng, Biston có bướm lượn + phấn hoa, cây phát sinh có loài nhún + phấn hoa.
+- **Tour 3D**: nút tự chuyển 23 cảnh mỗi 4,2 giây, dừng khi bấm lại hoặc rời tab Lab.
+
+### 3. Hiểu sâu 7 chuyên đề
+- Modal mới: **câu chuyện đời thường → cơ chế 4 bước → 3 chỗ hay nhầm → 3 câu tự kiểm tra → sơ đồ khái niệm SVG**.
+- 7 chuyên đề: ADN→protein, NST & phân bào, di truyền & xác suất, thực vật, động vật & nội môi, tiến hoá & quần thể, tế bào.
+- Nút **“Luyện 5 câu chủ đề này”** phát đề đúng chuyên đề.
+- Mỗi thẻ lý thuyết có **“Kiểm tra nhanh 3 câu”** (đề 3 MCQ đúng chuyên đề) và **“Hiểu sâu”**.
+- Lộ trình có thêm **thẻ chuỗi ngày** + mini heatmap 14 ngày.
+
+### 4. Hiệu ứng giao diện
+- **Chuyển cảnh mượt** khi đổi tab.
+- **Gợn sóng (ripple)** khi bấm nút/chip.
+- **Confetti** khi điểm ≥ 9 hoặc đạt mốc chuỗi 3/7/14/30 ngày.
+- **Modal mở bằng scale/fade**, **card nhấc nhẹ khi hover**.
+- Tôn trọng `prefers-reduced-motion` và công tắc hiệu ứng `data-fx="off"`.
+
+### 5. Kiểm chứng
+- 23/23 cảnh có vật thể chuyển động (kể cả 7 cảnh từng đứng yên); tour đổi cảnh sau 4,2s; tiêu đề cảnh hiện đúng.
+- 10 view + 23 lab + mọi control + đề 18·4·6 + ngân hàng + 5 modal: **0 exception**.
+- 4 viewport 390/820/1366/1920: **0 tràn ngang**, modal Hiểu sâu vừa màn hình.
+- `sinh.html` 1633 KB (gzip **454 KB**) — tăng do thêm nội dung Hiểu sâu + hiệu ứng.
 
 ## 3g. v5.11–v5.12 — Chấm đúng hơn, giải thích toàn bộ, 3D mới, tài khoản + chuỗi + nhắn tin
 
@@ -325,6 +392,8 @@ Khi chưa có backend, các giới hạn ở mục 4 vẫn đúng: không phân 
 - v5.6: 10 chủ đề / 104 câu lớp 11; cấu hình mạng/tim/grace; mini-game khủng long (nhảy, mất mạng, chơi lại, tự dừng); mô phỏng 2 người — người nộp sớm vào màn chờ, người còn lại làm tiếp và **được 3.33 điểm cho 1 câu làm đúng** thay vì 0; review có "Vì sao"; xác nhận thoát phòng; 4 viewport không tràn.
 - v5.7: 13 kỹ thuật Casio (cheat-sheet), 6 máy tính nâng cao đúng số liệu, giả lập 30 phím dựng được
   chuỗi bước và in màn hình; bản đồ 3 điểm 6,42/13,19 cM; không tràn ngang ở 4 kích thước.
+- v5.14: 11 view + 23 lab + đề + 5 modal: 0 exception; nến chạy tiếp sau reload; mini nến hiện trên tab khác; dock 11 tab không tràn ở 390/820/1366/1920; 0 tràn ngang.
+- v5.13: 23/23 cảnh có chuyển động (bob/pulse/spin + hạt); tour 3D; 7 chuyên đề Hiểu sâu có sơ đồ; quick quiz 3 câu đúng chuyên đề; 0 exception; 4 viewport 0 tràn.
 - v5.12: 23/23 cảnh 3D dựng được (≥8 vật, ≥2 nhãn, 0 lỗi WebGL); xoay/zoom đổi góc; tài khoản A→B→A tách sạch cả khoá lớn trong IndexedDB (A='x', B='y'); sai PIN không vào được; chuỗi 35 ô; chat 2 tab gửi/nhận và chuỗi 1 ngày; 4 viewport 0 tràn; 0 exception.
 - v5.10: 9/9 chuyên đề giảng lại; bài tốt 98%, bài có 2 hiểu lầm bị chặn 45% và phát hiện "hay vấp"; kế hoạch 4 bước; AI mock trả đúng `mode=ai` + 72%; luyện 8 câu **đúng chuyên đề**; flashcard/điểm/lịch sử/UUID giữ nguyên sau reload.
 - v5.8: 23/23 lab vẽ được sau khi thêm lớp khí quyển (đo pixel: không canvas nào trắng); màu nhận diện
@@ -355,6 +424,10 @@ Bản này **không kèm thư mục test**. Muốn kiểm tra lại, mở `sinh.
 | Tài khoản nhiều người trên cùng máy | ✅ v5.12 — hồ sơ cục bộ, dữ liệu tách riêng (kể cả IndexedDB); PIN là khoá mềm |
 | Chuỗi ngày học | ✅ v5.12 — heatmap 35 ngày + kỷ lục |
 | Nhắn tin + chuỗi tin nhắn | ✅ v5.12 — qua kênh ghép đôi; chỉ khi cả hai đang mở app, không server lưu tin |
+| Hiểu sâu 7 chuyên đề + sơ đồ khái niệm | ✅ v5.13 — câu chuyện, cơ chế, bẫy, tự kiểm tra, luyện 5 câu |
+| Hoạt ảnh 3D + tour 3D | ✅ v5.13 — 23/23 cảnh động, tiêu đề cảnh, bụi sáng, tour 4,2s |
+| Nến học tập + mini nến toàn trang | ✅ v5.14 — cháy theo thời gian, không hiện đồng hồ, lưu qua reload |
+| Hiệu ứng 3D nâng cao | ✅ v5.14 — scanline, bokeh, additive glow |
 | Lớp học, giao bài, bảng xếp hạng lớp | ✅ v5.9 — chủ phòng quản lý, dữ liệu lưu trên máy GV |
 | Giải đấu có vòng loại/bán kết/chung kết | ✅ v5.9 — 3 vòng, seed, đếm ngược, tái đấu (⚠ điểm không được server xác thực) |
 | Question Studio đầy đủ (mọi dạng câu) | ⚠ Mới có ngân hàng + nhập JSON câu tự soạn |

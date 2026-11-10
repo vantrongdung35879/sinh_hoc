@@ -4,7 +4,7 @@
    - Không cache request khác origin (PeerJS CDN, fonts...) để tránh cũ.
    Nâng CACHE_VERSION mỗi lần phát hành để trình duyệt lấy bản mới. */
 'use strict';
-const CACHE_VERSION = 'biogalaxy-v5-8-0';
+const CACHE_VERSION = 'biogalaxy-v5-12-0';
 const CORE = [
   './',
   './index.html',

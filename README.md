@@ -2,7 +2,7 @@
 
 Ứng dụng học tập Sinh học 12 chạy hoàn toàn trên trình duyệt (GitHub Pages), gồm **ứng dụng học sinh** (`sinh.html`), **bảng quản trị** (`admin.html`), **cổng vào** (`index.html`) và công cụ build icon (`_ins_sprite.js`).
 
-Phiên bản tài liệu: **v5.8** · Năm học: **2026–2027**.
+Phiên bản tài liệu: **v5.12** · Năm học: **2026–2027**.
 
 ---
 
@@ -92,6 +92,89 @@ có ô tìm kiếm toàn văn. Các câu phụ thuộc hình ảnh trong bản g
 - **Mini-game khủng long** (Canvas 2D thuần, không CDN): bầu trời đêm có sao/trăng/mây, đồi xa, xương rồng, khủng long nhảy bằng Space / ↑ / chạm, **3 mạng**, điểm tăng dần, bụi khi mất mạng, màn hình hết mạng, nút Chơi lại. Tự dừng khi vào trận / ẩn tab / tắt hiệu ứng nặng.
 - Lab: thêm lớp phản xạ kính và ánh sáng đỉnh cho khung thí nghiệm (tắt trên điện thoại để đỡ tải GPU).
 - Dock 10 tab trên điện thoại cuộn ngang, vẫn hiện nhãn, thanh chỉ thị tự căn theo tab đang chọn.
+
+## 3g. v5.11–v5.12 — Chấm đúng hơn, giải thích toàn bộ, 3D mới, tài khoản + chuỗi + nhắn tin
+
+### 1. Hết "hiểu lầm giả" khi giảng lại (v5.11)
+- Bộ chấm tại máy chuyển từ khớp từ khoá thô sang **chấm theo câu**: cắt câu, bỏ dấu tiếng Việt, nhận diện phủ định ("không lấy CO₂ bằng rễ", "không phải…"), chỉ gắn hiểu lầm khi câu **khẳng định sai**.
+- Mỗi hiểu lầm có **bằng chứng**: trích đúng câu đã nói; bấm "Không phải lỗi của tôi" để đưa vào danh sách miễn trừ (`tutor_allow`) và không bị trừ điểm lần sau.
+- Có hiểu lầm → điểm bị chặn (1 lỗi ≤60%, 2 lỗi ≤45%) dù đủ từ khoá.
+
+### 2. Giải thích cho người chưa biết gì (v5.11)
+- **"Giải thích siêu dễ"** gắn vào **mọi dạng câu**: MCQ, Đúng/Sai, trả lời ngắn, câu lớp 11, flashcard, "Câu sai".
+- Mỗi câu có 6 lớp: *Đề hỏi gì → Nói thật chậm → Giống như thế này → Vì sao đáp án đúng → Vì sao 3 phương án kia sai → Mẹo làm nhanh*, kèm "Chỉ cần nhớ".
+- Không chèn trùng, không lộ giải thích khi đang thi.
+
+### 3. Học thông minh hơn (v5.11)
+- **Bản đồ thành thạo** theo 7 chuyên đề, **điểm mục tiêu** (thang 10), **kế hoạch 7 ngày**, **luyện trộn nhiều chuyên đề**.
+- Gia sư AI giữ nguyên: giảng lại, phát hiện chỗ vấp ≥2 lần, kế hoạch 4 bước.
+
+### 4. 3D mới — nhìn ra được (v5.12)
+- **Engine viết lại**: 2 nguồn sáng + ambient trời + specular + fresnel + sương mờ; **bóng đổ mềm** dưới vật; nền gradient + vignette.
+- **Kéo để xoay, lăn chuột để zoom**, tự xoay khi rảnh, nhấp đúp để về góc mặc định.
+- **Nhãn tên bộ phận** dán theo vật thể 3D (Lá, Khí khổng, Phổi, Phế nang, Helicase, Tâm động…), có màu theo nhóm.
+- **23 cảnh dựng lại** đúng hình dạng: phòng ngủ có giường–người–cây–cửa sổ–trăng; kinesin bước trên vi ống; nơron có bao myelin; lá C3/C4; catalase + bọt O₂; tế bào thẩm thấu; tụy–gan–mạch máu; khí khổng hai tế bào hạt đậu; nấm men + bóng CO₂; cây + mặt trời + O₂/CO₂; nguyên phân có thoi; giảm phân có chiasma; chạc tái bản chữ Y; phiên mã/dịch mã có ribosome + chuỗi axit amin; 3 dạng đột biến; phổi + khí quản + cơ hoành + phế nang; thận + nephron; bảng Punnett 3D; X/Y; NST + histone; bướm Biston; Hardy–Weinberg; cây phát sinh chủng loại.
+- Lite vẫn 2D như cũ; máy không WebGL tự lui 2D.
+
+### 5. Tài khoản trên máy (v5.12)
+- Nhiều người dùng chung một máy, mỗi người một hồ sơ: tên, avatar, PIN tuỳ chọn.
+- **Dữ liệu tách riêng thật**: khi tạo/chuyển, ứng dụng lưu **snapshot toàn bộ khoá** (cả localStorage lẫn IndexedDB) rồi nạp lại hồ sơ đích; không lẫn lịch sử/tiến độ giữa các tài khoản.
+- **PIN chỉ là khoá mềm**, không mã hoá dữ liệu; ai dùng chung máy vẫn mở được file lưu. Muốn bảo mật thật cần máy chủ.
+
+### 6. Chuỗi ngày học (v5.12)
+- Chip 🔥 trên thanh trên; bấm mở **heatmap 35 ngày**, chuỗi hiện tại, kỷ lục, số câu/phút/XP hôm nay.
+- Ghi nhận khi làm bài, luyện tập, dùng lab/lý thuyết hoặc giảng lại; không có dữ liệu thì không bịa.
+
+### 7. Nhắn tin + chuỗi tin nhắn (v5.12)
+- Tab **💬 Nhắn tin** trong Trung tâm kết nối, dùng đúng kênh đã ghép đôi (WebRTC hoặc 2 tab cùng máy).
+- Mỗi cặp có **chuỗi ngày nhắn tin**: chỉ tăng khi **cả hai bên** gửi ít nhất 1 tin trong ngày; lưu trên máy, không có máy chủ.
+- Chỉ gửi được khi cả hai đang mở app; đóng app là không gửi.
+
+## 3f. v5.10 — Gia sư AI · Giảng lại với máy
+
+Vào **Lý thuyết / Phòng thi / Lộ trình → Gia sư AI**, hoặc trong phần **Câu sai** sau khi thi.
+
+| Tab | Việc gì xảy ra |
+|---|---|
+| 🗣️ **Mình giảng lại** | Chọn 1 trong **9 chuyên đề** rồi viết (hoặc bấm micro để nói) lời giải thích của riêng bạn. Máy đối chiếu với **rubric các ý cốt lõi**, tìm **ý còn thiếu** và **hiểu lầm cụ thể**, chấm 0–100% kèm lời khen / lời khuyên. Có hiểu lầm thì điểm bị **chặn dưới 60%** dù có đủ từ khoá — không cho điểm ảo. |
+| 📖 **Máy giảng lại** | Giảng lại từ số 0: *nói thật chậm → ví dụ đời thường → ví dụ cụ thể → câu nhớ*, kèm danh sách ý bắt buộc và hiểu lầm hay gặp. |
+| 🎯 **Kế hoạch tự học** | Gộp **bài giảng lại + tỉ lệ đúng theo chuyên đề + lịch sử làm bài**. Chỗ nào **lặp ≥ 2 lần** được đẩy lên đầu; mỗi chỗ yếu có 4 bước 15–30 phút: đọc 3 khung → luyện 8 câu đúng chuyên đề → flashcard ôn ngắt quãng → giảng lại kiểm tra. **Không có dữ liệu thì nói "chưa đủ", không bịa nhận xét.** |
+| ⚙️ **Kết nối AI** | Tuỳ chọn endpoint tương thích OpenAI + model + **key của riêng bạn** (lưu trên thiết bị, không có trong mã nguồn). Có nút thử kết nối và xoá key. |
+
+**Trung thực về AI:** bản tĩnh **không có LLM nhúng sẵn**. Mặc định chạy **bộ chấm tại máy** (offline, không gửi gì ra ngoài): khớp từ khoá đã bỏ dấu, đo độ rõ của câu, trừ điểm theo hiểu lầm. Chỉ khi bạn tự điền key và endpoint thì mới gọi AI thật; nếu lỗi/CORS/hết giờ (14s) → **tự lui về chấm tại máy và báo rõ lý do**. Không dùng `service_role key` hay khoá máy chủ, không gửi dữ liệu tới server nào mặc định.
+
+**Lưu ý an toàn:** không dán key thật vào file public / GitHub Pages dùng chung; nhiều provider chặn gọi từ trình duyệt.
+
+## 3e. v5.9 — 3 tính năng "cần backend" làm không cần server, lab WebGL, giải thích siêu dễ
+
+### 1. Trung tâm kết nối (`HUB`) — **không tạo thư mục, không dùng backend**
+
+Vào **Phòng thi → Trung tâm kết nối**. Ba tab:
+
+| Tab | Cách làm | Dữ liệu nằm ở đâu |
+|---|---|---|
+| 🔄 **Đồng bộ** | Máy A tạo **mã mời** → máy B dán → máy B gửi lại **mã đáp** → A dán. Hai máy bắt tay **WebRTC DataChannel** trực tiếp (STUN công khai), không đi qua server của ai. Có kênh **2 tab cùng máy** qua `BroadcastChannel` để thử offline. | localStorage + IndexedDB trên **từng máy**; xung đột giải theo **thời gian mới hơn** cho từng mục |
+| 🏫 **Lớp học** | GV tạo lớp (tên + mã), giao đề theo 3 mẫu, đặt hạn. HS vào bằng mã, làm bài, gửi kết quả. GV xem **điểm TB, điểm cao nhất, tỉ lệ hoàn thành, chuyên đề lớp yếu** và bảng xếp hạng. HS chỉ thấy điểm của mình. | Bản ghi lớp lưu trên **máy chủ phòng** |
+| 🏆 **Giải đấu** | 4–16 thí sinh → **Vòng loại → Bán kết → Chung kết**. Mỗi vòng có **seed** (tái tạo đúng đề), đồng hồ đếm ngược, điểm trực tiếp, xếp hạng, xử lý mất kết nối, ghi điểm tay (✎), **tái đấu**. | Bảng đấu lưu trên máy chủ phòng |
+
+**Giới hạn trung thực (đọc kỹ):** không có máy chủ nên (1) chỉ đồng bộ khi **cả hai máy đang mở app và còn nối**; (2) không có tài khoản đám mây, không tự đồng bộ khi tắt máy; (3) **điểm do máy thí sinh gửi về chủ phòng** nên không chống được gian lận có chủ đích — muốn chống thật vẫn phải có backend xác thực lượt thi. Ứng dụng ghi rõ điều này ngay trong giao diện, không giả vờ là server.
+
+### 2. Phân tầng đồ họa cho 23 thí nghiệm
+
+| Mức | Cách vẽ |
+|---|---|
+| **Lite** | Giữ **nguyên canvas 2D như cũ**, nhưng làm đẹp nút/seg/slider/thẻ số đo bằng gradient + viền (không dùng blur/shadow). Thêm **huy hiệu minh hoạ nhận diện**: cây cam có quả cam, người có đầu/mình/tay/chân, ADN, tế bào, khí khổng, enzyme, phổi, bướm… |
+| **Cân bằng / Đầy đủ** | **Vẽ lại từng thí nghiệm bằng WebGL thuần** (không CDN, không file mới): 23 cảnh 3D riêng — cây quang hợp, nơron, chạc tái bản, khí khổng, phổi, thận, bảng Punnett 3D, bướm Biston, cây phát sinh chủng loại… Có đổ bóng Lambert + specular + rim light, sàn, biểu đồ cột 3D **ăn theo thanh trượt**, camera trôi chậm. |
+
+- Nút **Xem 2D / Xem 3D** cho phép đổi tay bất kỳ lúc nào; Lite luôn 2D.
+- Máy không có WebGL → **tự lui về 2D**, có thông báo rõ ràng (không mất thí nghiệm).
+- Engine: shader tự viết, mesh cầu/trụ/nón/hộp tự sinh, ma trận `perspective / lookAt / TRS`, gradient cache, DPR cap 1.5 (phone) / 2 (desktop).
+
+### 3. Kiến thức & lời giải cho người chưa biết gì
+
+- **Giải thích siêu dễ** (bật mặc định, tắt được ở Cài đặt): mỗi lời giải có 6 lớp — *Đề đang hỏi gì → Nói thật chậm → Giống như thế này → Vì sao đáp án này đúng → Vì sao 3 phương án kia sai → Mẹo làm nhanh*, kèm **Chỉ cần nhớ** và **50 thuật ngữ** có chú giải khi đưa chuột vào. Áp dụng cho ngân hàng, xem lại bài và "Câu sai".
+- **Học từ số 0**: 6 bài nền (ADN→protein, NST & chia tế bào, di truyền, thực vật, động vật, tiến hóa) theo đúng cấu trúc *NÓI THẬT CHẬM / GIỐNG NHƯ / CHỈ CẦN NHỚ* + câu tự kiểm tra có đáp án ngay.
+- **Soát dữ liệu**: 356 MCQ (đáp án 93/94/82/87), 56 cụm Đ-S, 73 câu ngắn — **0 câu thiếu lời giải, 0 trùng phương án, 0 đáp án sai chỉ số, 0 câu ngắn thiếu chuyên đề**.
 
 ## 3d. v5.8 — không khí lab, game mới, hiệu ứng 3D
 
@@ -242,6 +325,8 @@ Khi chưa có backend, các giới hạn ở mục 4 vẫn đúng: không phân 
 - v5.6: 10 chủ đề / 104 câu lớp 11; cấu hình mạng/tim/grace; mini-game khủng long (nhảy, mất mạng, chơi lại, tự dừng); mô phỏng 2 người — người nộp sớm vào màn chờ, người còn lại làm tiếp và **được 3.33 điểm cho 1 câu làm đúng** thay vì 0; review có "Vì sao"; xác nhận thoát phòng; 4 viewport không tràn.
 - v5.7: 13 kỹ thuật Casio (cheat-sheet), 6 máy tính nâng cao đúng số liệu, giả lập 30 phím dựng được
   chuỗi bước và in màn hình; bản đồ 3 điểm 6,42/13,19 cM; không tràn ngang ở 4 kích thước.
+- v5.12: 23/23 cảnh 3D dựng được (≥8 vật, ≥2 nhãn, 0 lỗi WebGL); xoay/zoom đổi góc; tài khoản A→B→A tách sạch cả khoá lớn trong IndexedDB (A='x', B='y'); sai PIN không vào được; chuỗi 35 ô; chat 2 tab gửi/nhận và chuỗi 1 ngày; 4 viewport 0 tràn; 0 exception.
+- v5.10: 9/9 chuyên đề giảng lại; bài tốt 98%, bài có 2 hiểu lầm bị chặn 45% và phát hiện "hay vấp"; kế hoạch 4 bước; AI mock trả đúng `mode=ai` + 72%; luyện 8 câu **đúng chuyên đề**; flashcard/điểm/lịch sử/UUID giữ nguyên sau reload.
 - v5.8: 23/23 lab vẽ được sau khi thêm lớp khí quyển (đo pixel: không canvas nào trắng); màu nhận diện
   lan tới readout; tilt 3D trả `--tilt-x/--tilt-y`; game: nhảy đôi, nhặt 🧬 +6, mất mạng → hết mạng → chơi lại;
   gợn sóng tạo và tự xoá sau 0.54s; thanh cuộn `scaleX` đúng; ghi `store` → reload → dữ liệu và UUID còn nguyên.
@@ -266,9 +351,12 @@ Bản này **không kèm thư mục test**. Muốn kiểm tra lại, mở `sinh.
 | Hồ sơ UUID, sao lưu/khôi phục JSON | ✅ Đã có |
 | PWA (manifest, SW, icon) | ✅ Đã có (chỉ http/https) |
 | Casio 7 kỹ thuật + chuỗi phím theo số liệu | ✅ Đã có (v5.4) |
-| Đồng bộ đa thiết bị thật | ⛔ Cần backend |
-| Lớp học, giao bài, bảng xếp hạng lớp | ⛔ Cần backend |
-| Giải đấu có vòng loại/bán kết/chung kết | ⛔ Cần backend + xác thực lượt thi |
+| Đồng bộ đa thiết bị thật | ✅ v5.9 — WebRTC DataChannel ghép đôi bằng mã (không server) |
+| Tài khoản nhiều người trên cùng máy | ✅ v5.12 — hồ sơ cục bộ, dữ liệu tách riêng (kể cả IndexedDB); PIN là khoá mềm |
+| Chuỗi ngày học | ✅ v5.12 — heatmap 35 ngày + kỷ lục |
+| Nhắn tin + chuỗi tin nhắn | ✅ v5.12 — qua kênh ghép đôi; chỉ khi cả hai đang mở app, không server lưu tin |
+| Lớp học, giao bài, bảng xếp hạng lớp | ✅ v5.9 — chủ phòng quản lý, dữ liệu lưu trên máy GV |
+| Giải đấu có vòng loại/bán kết/chung kết | ✅ v5.9 — 3 vòng, seed, đếm ngược, tái đấu (⚠ điểm không được server xác thực) |
 | Question Studio đầy đủ (mọi dạng câu) | ⚠ Mới có ngân hàng + nhập JSON câu tự soạn |
 | Flashcard & gia sư theo năng lực | ✅ Đã có (SRS + phân tích dữ liệu thật) |
 | Sơ đồ tương tác kéo–thả | ✅ 3 sơ đồ; mở rộng thêm chủ đề là việc tiếp theo |

@@ -2,7 +2,7 @@
 
 Ứng dụng học tập Sinh học 12 chạy hoàn toàn trên trình duyệt (GitHub Pages), gồm **ứng dụng học sinh** (`sinh.html`), **bảng quản trị** (`admin.html`), **cổng vào** (`index.html`) và công cụ build icon (`_ins_sprite.js`).
 
-Phiên bản tài liệu: **v5.14** · Năm học: **2026–2027**.
+Phiên bản tài liệu: **v5.20** · Năm học: **2026–2027**.
 
 ---
 
@@ -159,6 +159,195 @@ có ô tìm kiếm toàn văn. Các câu phụ thuộc hình ảnh trong bản g
 - 10 view + 23 lab + mọi control + đề 18·4·6 + ngân hàng + 5 modal: **0 exception**.
 - 4 viewport 390/820/1366/1920: **0 tràn ngang**, modal Hiểu sâu vừa màn hình.
 - `sinh.html` 1633 KB (gzip **454 KB**) — tăng do thêm nội dung Hiểu sâu + hiệu ứng.
+
+## 3m. v5.20 — Kiểm tra theo phạm vi, 4 game sảnh chờ, tài khoản có tiến độ, chat nổi
+
+### 1. Kiểm tra tùy chỉnh (tab Ôn 10–12 → 🎯 Kiểm tra)
+- **Phạm vi:** toàn bộ · theo phần · theo chương · **theo từng bài** · theo chủ đề.
+- **Dạng câu:** trộn 3 dạng · trắc nghiệm · đúng/sai · trả lời ngắn · **tự luận**.
+- **Số câu** 5/10/15/20/30, **thời gian** 5/10/15/30/50 phút, **hình thức** Solo hoặc **Đấu phòng tối đa 15 người**.
+- Ngân hàng hiển thị số câu phù hợp trước khi bắt đầu; thiếu câu thì tự phân bổ lại hoặc báo rõ.
+- **Tự luận:** đề + ô viết + lưu nháp + mở dàn ý chi tiết để đối chiếu.
+- Đấu phòng dùng trắc nghiệm, chủ phòng tạo mã, khách vào bằng mã như phòng thi cũ.
+
+### 2. Bốn game sảnh chờ, mỗi phòng một game
+| Game | Cách chơi |
+|---|---|
+| 🦖 Khủng long | nhảy qua xương rồng, nhặt 🧬 |
+| 🚜 Xe tăng | kéo để di chuyển, chạm để bắn robot, 3 mạng |
+| ⚡ Sấm chớp | chạm tạo gió chặn tia sét, giữ tháp, 3 khiên |
+| 🐸 Ếch săn muỗi | chạm vào muỗi để phóng lưỡi, 30 giây |
+
+- Chủ phòng chọn game bằng chip; khách thấy đúng game đó.
+- Mặc định **mỗi mã phòng chọn một game khác nhau** theo hàm băm mã phòng, không phải phòng nào cũng khủng long.
+- Không cần mạng để chơi; chỉ cần đang ở sảnh chờ.
+
+### 3. Tài khoản có tiến độ thật
+- Thẻ **Tiến độ của tài khoản này** trong hồ sơ: số bài đã đọc, đã học, số bài thi, chuỗi ngày, thanh %.
+- Nút **▶ Học tiếp** mở ngay bài chưa đọc; **🎯 Kiểm tra** mở tab tạo đề.
+- Bài đọc/bài học/lịch sử thi/chuỗi ngày/chat được lưu cùng tài khoản trên máy; chuyển tài khoản là đổi cả bộ dữ liệu.
+
+### 4. Chat nổi
+- **Bong bóng nước ở góc dưới phải**, kéo được đến vị trí bất kỳ; vị trí lưu lại; có nút về góc mặc định.
+- Ba loại: **🌐 Chung** (mọi người trên kênh đang kết nối / mọi tài khoản trên máy), **💬 Riêng** (1-1 với người đã ghép đôi), **👥 Nhóm** (tự tạo, mời người đang kết nối).
+- Gửi **ảnh/tệp đến 3 MB**, lưu trong IndexedDB, tải lại được; ảnh xem trực tiếp.
+- **Sửa**, **thu hồi**, **xoá** tin của mình; tin đã thu hồi hiện nhãn tương ứng.
+- Lưu trên máy, giữ sau reload; tệp chat không bị xoá khi đổi tài khoản.
+- **Giới hạn thật:** không có server nên "Chung" chỉ đến những người đang kết nối qua Trung tâm kết nối (hoặc các tài khoản trên cùng máy), không phải chat toàn Internet.
+
+### 5. Sửa lỗi giao diện
+- Bỏ `button{min-height:38px}` trên máy cảm ứng — đây là nguyên nhân icon 33px bị kéo thành 38px, chip "Đọc xong" và nút dock bị phồng. Giờ chỉ `.btn` chính mới có vùng chạm lớn.
+- **Sơ đồ tư duy vẽ lại**: thẻ nhánh có số, màu theo nhóm, đường cong gradient, tâm nổi bật; tên dài tự thu nhỏ, không tràn.
+- Toast dời sang trái để không đè bong bóng chat.
+
+### 6. Kiểm chứng
+- Kiểm tra: phạm vi chương 1 có 117 trắc nghiệm · 25 chùm Đ/S · 37 câu ngắn; đề trộn 10 câu ra đúng 6+2+2, toàn bộ thuộc chương 1.
+- Tự luận: mở đề, lưu nháp, mở dàn ý, đổi đề, đóng.
+- Game: 4 chip, chuyển tank/storm/frog/dino đều chạy, tắt game cũ đúng.
+- Tài khoản: thẻ tiến độ 4 ô, nút Học tiếp/Kiểm tra.
+- Chat: gửi, sửa, thu hồi, tạo nhóm, gắn tệp, kéo bong bóng, reload vẫn còn.
+- 12 view + 23 lab + đề 18·4·6 = **10.00** + 5 modal: **0 exception**; 4 viewport 0 tràn; icon 33×33, chip đọc 60×18.
+
+## 3l. v5.19 — Học sâu từng bài: nói thật chậm, sơ đồ riêng, thuật ngữ, chế độ Học lại
+
+### 1. Mỗi bài dễ hiểu hơn
+- Thêm khối **🗣️ Nói thật chậm**: 2 câu giải thích bằng lời đời thường, không dùng thuật ngữ mà không giải nghĩa.
+- Thêm **🪄 Giống như**: một so sánh quen thuộc (photo cuốn sổ, công tắc đèn, nếm canh…).
+- Thêm **2 ý cần nhớ** cho mỗi bài → trung bình **8 ý/bài** (trước là 6).
+- Thêm hàng **từ khoá** dạng chip để nhìn nhanh trước khi đọc.
+
+### 2. Sơ đồ riêng cho từng bài
+- Mỗi bài có **🧠 Sơ đồ bài này**: tâm là tên bài, các nhánh là từ khoá, mỗi nhánh kèm một dòng giải thích.
+- Sơ đồ sinh tự động từ dữ liệu bài (không vẽ tay), nên sửa nội dung là sơ đồ đổi theo.
+- Vẫn giữ tab **Sơ đồ** với 1 sơ đồ tổng quát 3 phần + 8 sơ đồ chương.
+
+### 3. Từ điển thuật ngữ
+- **58 thuật ngữ** giải nghĩa bằng một câu (DNA, allele, codon, operon, dịch khung, thể lệch bội, ổ sinh thái, Hardy–Weinberg…).
+- Trong bài, từ nào có trong từ điển được **gạch chấm**; rê chuột/chạm để xem nghĩa ngay, không phải nhảy trang.
+- Thêm tab **📚 Thuật ngữ** để tra toàn bộ.
+
+### 4. Chế độ **Học lại**
+- Nút **▶ Học tiếp** ở đầu tab: mở ngay bài đầu tiên chưa đọc/chưa đánh dấu.
+- Nút **▶ Học lại** trong từng bài: mở hộp học tập trung gồm *nói thật chậm → sơ đồ bài → 8 ý → hình → công thức → bẫy → ví dụ*.
+- Điều hướng **← Bài trước / Bài sau →**, phím ←/→, Esc để đóng; thanh tiến độ bài x/35.
+- Đánh dấu **đã học / đọc xong** ngay trong hộp, không phải quay ra danh sách.
+
+### 5. Kiểm chứng
+- Bài 1: 5 chip từ khoá, khối nói thật chậm + so sánh, 8 ý, sơ đồ bài, 19 từ có chú giải.
+- Thuật ngữ: 58 dòng; Sơ đồ: 9 sơ đồ; Công thức 19 dòng; Dễ nhầm 21 cặp; Đề thi 3 bảng.
+- Học lại: mở đúng bài, next/prev đúng thứ tự, đóng được; hộp vừa 390/820/1366/1920.
+- 12 view + 23 lab + đề 18·4·6 = **10.00** + 5 modal: **0 exception**; 0 tràn ngang.
+
+## 3k. v5.18 — Ôn 10–12 bản 2: khóa lớp 10–11, hợp nhất tài liệu, sơ đồ tư duy & "Đọc xong"
+
+### 1. Khóa đúng phạm vi
+- **Lớp 10 và lớp 11: KHÓA**. Bấm vào hiện thẻ 🔒 "đang khóa — gửi tài liệu để mở", ẩn tab con, số liệu để "—". Không còn hiển thị khung nội dung chưa được kiểm chứng.
+- **Lớp 12: mở đầy đủ 35 bài**, hợp nhất nội dung từ 3 bản tổng kết (bản đồ 35 bài, cẩm nang từng bài, bản tóm tắt theo chương).
+
+### 2. Nội dung lớp 12 dày hơn
+- Mỗi bài có **5–7 ý cần nhớ**, công thức, 2–4 bẫy, ví dụ/ứng dụng.
+- Bổ sung các chi tiết từ tài liệu mới: pha S và 3 nguyên tắc tái bản, 64 codon, lacI/promoter/operator, đồng nghĩa – sai nghĩa – vô nghĩa, vector nhân dòng vs biểu hiện, nucleosome 146–147 bp, thể bốn 2n+2, tự đa bội/dị đa bội, `p = (2N_AA+N_Aa)/2N`, 3 nhóm tài nguyên, 17 SDG…
+- **Ghi rõ chỗ tài liệu khác nhau**: sơ đồ đóng gói NST của SGK Kết nối tri thức (10 nm → vòng → 700 nm) và mức 30/300 nm của nhiều tài liệu cũ.
+
+### 3. Sơ đồ tư duy & hình ảnh
+- Tab con **🧠 Sơ đồ**: 1 sơ đồ tổng quát 3 phần + **8 sơ đồ từng chương**, sinh tự động từ dữ liệu (không vẽ tay, không lệch nội dung).
+- **10 hình minh họa SVG** gắn đúng bài: tái bản DNA, trung tâm luận, operon lac, đóng gói NST, Punnett, trao đổi chéo, Hardy–Weinberg, tháp năng lượng, chu trình nitrogen, diễn thế.
+- Hình và sơ đồ **cuộn ngang trong khung** trên điện thoại, không làm tràn trang.
+
+### 4. "Đọc xong" ở góc trên
+- Mỗi bài có chip trạng thái ở góc trên bên phải: **"Chưa đọc" → "✓ Đọc xong"**.
+- Tự đánh dấu khi cuộn tới cuối bài (IntersectionObserver trên điểm kết bài), hoặc bấm chip để đổi tay.
+- Lưu `syl_read` trên máy; đầu trang có ô **"Đọc xong"** và dòng "x/35 bài đã đọc", tách biệt với "Đã học".
+
+### 5. Kiểm chứng
+- Lớp 12: 8 chương / 35 bài / 3 phần; lớp 10–11 hiện thẻ khóa, tab ẩn.
+- Mở bài 1: 6 ý cần nhớ, 3 bẫy, 1 hình SVG; cuộn hết → chip "✓ Đọc xong", `syl_read.b1=true`, reload vẫn còn.
+- Tab sơ đồ: 9 SVG; công thức 19 dòng; dễ nhầm 21 cặp; đề thi 3 bảng.
+- 12 view + 23 lab + đề 18·4·6 = **10.00** + 5 modal: **0 exception**; 4 viewport 0 tràn; hình/sơ đồ cuộn trong khung trên phone.
+
+## 3j. v5.17 — Tab "Ôn 10–12": một kho kiến thức ba năm
+
+Tab thứ 12 trên dock, dùng được cả ở chế độ No Key. Không thêm file, không gọi mạng, không backend.
+
+### Có gì trong tab
+| Khối | Nội dung |
+|---|---|
+| **Lớp 12** | **Đủ 8 chương – 35 bài** theo SGK Kết nối tri thức: DNA → gene → điều hòa → đột biến → công nghệ gene → NST → Mendel → mở rộng → giới tính → hoán vị → đột biến NST → di truyền người → ngoài nhân → môi trường → quần thể → tiến hóa → sinh thái. Mỗi bài 4 khối: **Cần nhớ / Công thức / Bẫy thường gặp / Ví dụ – ứng dụng**. |
+| **Lớp 11** | **13 chủ đề** sinh học cơ thể: nước – khoáng, quang hợp, hô hấp thực vật, dinh dưỡng N, tiêu hóa, hô hấp động vật, tuần hoàn, bài tiết – nội môi, miễn dịch, cảm ứng, sinh trưởng – phát triển, sinh sản, mối quan hệ giữa các quá trình sinh lí. |
+| **Lớp 10** | **9 chủ đề** sinh học tế bào – vi sinh vật – virus: cấp độ tổ chức, thành phần hóa học, cấu trúc tế bào, trao đổi chất qua màng, chuyển hóa năng lượng, truyền tin, phân bào, vi sinh vật, virus & miễn dịch. |
+| **Công thức** | 4 nhóm – 19 dòng: DNA/gene, Mendel – hoán vị, quần thể (Hardy–Weinberg), sinh thái (mật độ, tăng trưởng, hiệu suất). |
+| **Dễ nhầm** | 15 cặp khái niệm hay bị hỏi bẫy, kèm một câu phân biệt. |
+| **Đề thi** | Cấu trúc 2025–2026 (18 – 4 – 6, thang điểm từng phần), phân bổ 80/15/5 và 4 chiến lược làm bài. |
+
+### Cách dùng
+- Chọn **Lớp 10 / 11 / 12**, gõ từ khóa để lọc (tự mở bài khớp), hoặc **Mở tất cả / Thu gọn**.
+- Bấm **"Đánh dấu đã học"** để tô dấu ✓ và cập nhật thanh tiến độ; lưu trên máy, giữ sau reload và tách theo tài khoản.
+- Bài lớp 12 có nút **"Luyện 6 câu"** — phát đề đúng chuyên đề từ ngân hàng hiện có.
+- Số liệu đầu trang: số chương, số bài, số bài đã học và % tiến độ của khối đang chọn.
+
+### Trung thực về phạm vi
+- Lớp 12 biên soạn từ bản tổng kết SGK Kết nối tri thức; lớp 10–11 là **khung cốt lõi theo chủ đề**, không chép nguyên văn từng bài và không thay thế sách giáo khoa.
+- Nội dung là ghi chú ôn tập: có công thức và bẫy, nhưng không có lời giải chi tiết cho mọi bài tập tính toán.
+
+## 3i. v5.16 — Hết lỗi "đang chơi bị chơi lại từ đầu" + soát lỗi ẩn
+
+> Bản sửa lỗi tổng hợp. Mọi lỗi dưới đây đều **tái hiện được bằng CDP** trước khi sửa. Không thêm thư mục, không backend, không CDN.
+
+### 1. Lỗi chính: game / trận đấu tự restart
+| Lỗi | Nguyên nhân | Sửa |
+|---|---|---|
+| **Khủng long chờ phòng** đang chơi tự về điểm 0, 3 mạng, mất xương rồng | `mpRender()` dựng lại `<canvas id="dinoCv">` mỗi khi có người vào phòng / đổi cấu hình / nhắn tin; `mount()` gọi `reset()` | `snapshot()/restore()`: mount chỉ **gắn lại canvas**, giữ nguyên điểm, mạng, chướng ngại, quỹ đạo. Debounce mount 60ms. `pause()` thay `stop()` khi ẩn tab, tự tiếp tục khi hiện lại. Kỷ lục lưu `dino_best`. |
+| **Đấu nhiều người** đang ở câu 4 bỗng nhảy về câu 1, mất hết đáp án | Gói `start` tới trễ / lặp (mất kết nối, relay TURN, Host bấm lại) gọi `mpBegin()` vô điều kiện | `mpOnData`/`netOnData` case `start`: bỏ qua nếu đang `playing/waiting` **và** cùng vòng; vòng mới (`round` lớn hơn) vẫn bắt đầu bình thường. Thêm khoá `_beginKey = seed|round` ngay trong `mpBegin()/netBegin()`. `netHostStartMatch` giờ gửi kèm `round`. |
+| **Casio** rời tab rồi quay lại mất số vừa nhập | `renderCasio()` → `casioPanels()` dựng lại ô với giá trị mặc định | Chụp → dựng → phục hồi → **mới** tính kết quả. |
+| **Thử thách 23 lab** reload là mất tiến độ | `EXPLORE.data` chỉ nằm trong RAM | Lưu `lab_explore`; `LABS[22]._seen` lưu `lab23_seen`; danh sách `lab_chal_done` chặn thưởng thành tích trùng sau reload. |
+
+### 2. Lỗi ẩn khác tìm được
+- **Mất chữ đang gõ**: `mpRender`, `netRenderModal`, `HUB.render` dùng `innerHTML=`, xoá mã phòng / tên / tin nhắn đang soạn. Thêm `bg4KeepInputs(root, fn)` chụp & phục hồi mọi `input/select/textarea` có id.
+- **Bấm nhanh nhảy 2 câu**: `mpPick` (kiểu cũ), `netPick`, `vsPick` dùng `setTimeout` không khoá → 2 cú chạm xếp hàng 2 lần chuyển câu. Thêm token `_pickToken`, chỉ timeout mới nhất được chạy.
+- **Bấm lại "Bắt đầu làm bài" mất bài im lặng**: 2 nút gọi `bg4StartExamClick()`, hỏi rõ ràng; **huỷ thì giữ nguyên đáp án và đồng hồ**. Các luồng tự động (kiểm tra nhanh, luyện gia sư AI, bài được giao, giải đấu) gọi `startExam()` thẳng, không bị chặn và không mất bộ lọc chuyên đề.
+- **Wrapper cũ phá bài trong lúc hỏi**: 2 wrapper `startExam` vẫn xoá `answers.mcq` / dừng timer dù đề chưa được tạo. Thêm cờ `__bg4ExamStarted` để wrapper bỏ qua.
+- **Phòng chờ nằm trong modal** (`mpRoom` còn ẩn) từng lọt qua bộ bảo vệ rời tab → nay `bg4RoomInfo()` xét trạng thái `MP/NET/vs`, không chỉ độ hiển thị.
+- Thay `alert()` cuối cùng bằng toast trong app.
+
+### 3. Kiểm chứng
+- DINO: điểm 87 / 2 mạng / 1 chướng ngại **giữ nguyên** sau `mpRender()`; pause → resume giữ 77 điểm, `t=4200`; `Chơi lại` về 0 nhưng kỷ lục 123 vẫn còn.
+- MP & NET: gói `start` trùng giữ `qi=3, 4 đáp án, remain=33`; **vòng 2 hợp lệ vẫn bắt đầu** (`round=2, seed=99`).
+- Casio `casioN=9` giữ nguyên sau khi đổi tab; chat / mã phòng / mã 1v1 giữ nguyên sau render.
+- Thử thách lab `exploreDone(0)=true` và `lab_explore` còn sau reload.
+- 11 view · 23/23 cảnh 3D động · đề 18·4·6 = **10.00** · 6 modal · nến · **0 exception**; 4 viewport 0 tràn; reload giữ dữ liệu.
+
+## 3h. v5.15 — Sửa lỗi phòng thi, chấm điểm, thông báo & thích ứng thiết bị
+
+> Bản sửa lỗi tổng hợp. Không thêm thư mục, không thêm backend, không thêm CDN.
+
+### 1. Rời phòng không còn "im lặng"
+- `go()` kiểm tra mọi phiên đang mở (phòng nhiều người, đấu 2 máy, VS cùng máy, bài thi Solo) trước khi rời tab **Phòng thi**.
+- Hiện **hộp xác nhận ngay trong app** (không dùng `confirm()` của trình duyệt — thứ bị chặn trên PWA / iframe / một số máy khiến bấm mãi không được): nêu rõ mất gì, có **Ở lại** / **Rời phòng**, Esc để huỷ.
+- Xác nhận thì dọn sạch: gửi `bye` cho những người cùng phòng, huỷ mọi timer & kênh, ẩn phòng, hiện lại cấu hình, **hiện thông báo "Đã rời phòng …"**. Huỷ thì ở yên, bài làm vẫn còn nguyên.
+- Đối thủ nhận `bye` giờ **vẫn được chấm theo các câu đã làm** thay vì màn "Đối thủ đã rời phòng" trống rỗng.
+- Cảnh báo khi đóng tab / reload trong lúc còn trong phòng.
+- **Tất cả 9 chỗ dùng `confirm()`** được thay bằng modal này (rời phòng, xoá lịch sử, đặt lại giao diện, khôi phục sao lưu, xoá tài khoản…).
+
+### 2. Nộp bài / hết giờ luôn có điểm
+| Tình huống | Trước | v5.15 |
+|---|---|---|
+| Đấu 2 máy: mình nộp, đối thủ im lặng | kẹt "Đang chấm điểm…" vô hạn | 6s gửi `collect` nhắc nộp → **12s tự chấm** theo đáp án thật đã nhận (`progress`) |
+| Đối thủ rời phòng / rớt mạng | không có điểm | `netForceGrade()` chấm cục bộ, hiện bảng điểm + thông báo |
+| Phòng nhiều người: chủ phòng không gửi bảng điểm | kẹt vô hạn | watchdog 30s: chủ phòng tự chấm, khách hiện thẻ "Chưa nhận được kết quả" + nút Về menu |
+| Bấm Nộp bài đúng lúc hết giờ (timer chưa kịp bắn) | có thể không ra điểm | `openSubmit()` chấm ngay với nhãn "Hết giờ" |
+| Timer sót lại bắn `gradeExam()` khi phòng đã đóng | **ghi lịch sử 0 điểm + mở thành tựu ảo** | cờ `__bg4GradeOK`: không chấm thật ⇒ không ghi gì |
+
+### 3. Thành tựu & thông báo ổn định
+- `toast()`: icon dạng `i-xxx` giờ render **SVG thật** (trước hiện chữ `i-bell`), chống trùng trong 1,1s, **tối đa 3 thông báo**, dọn timer sạch.
+- `ACH`: chịu được khoá lưu hỏng (`null` / object), mọi bước mở khoá bọc try/catch, thành tích **"Kiên trì" chỉ mở khi có 3 câu đúng liên tiếp** (trước chỉ cần ≥3 câu, kể cả sai hết).
+- Cấm ghi lịch sử / XP / thành tích khi không có bài được chấm thật.
+
+### 4. Thích ứng máy & chống nút/phím phình to
+- `html` có `font-size` tường minh + `-webkit-text-size-adjust:100%` (chặn trình duyệt tự phóng chữ trên Android/DPI lạ).
+- Mọi `.btn / .chip / .ckey / .kbd / .dock / .tiny / .xs` dùng `clamp(px, rem, px)` ⇒ **không bao giờ vượt ngưỡng** dù root font hay zoom hệ thống đổi.
+- `touch-action:manipulation` trên mọi nút/ô nhập (bỏ độ trễ 300ms), `font-size:16px` cho input trên máy cảm ứng (chặn iOS auto-zoom), vòng focus rõ ràng cho bàn phím.
+- Trên máy cảm ứng **tắt `transform:scale()` lúc :active** — lỗi kinh điển làm ngón tay trượt ra mép nút nên phải bấm lại lần 2.
+- `lg` hạ 16→15px để cỡ chữ lớn không làm nút phình ra.
 
 ## 3g. v5.11–v5.12 — Chấm đúng hơn, giải thích toàn bộ, 3D mới, tài khoản + chuỗi + nhắn tin
 
@@ -392,6 +581,12 @@ Khi chưa có backend, các giới hạn ở mục 4 vẫn đúng: không phân 
 - v5.6: 10 chủ đề / 104 câu lớp 11; cấu hình mạng/tim/grace; mini-game khủng long (nhảy, mất mạng, chơi lại, tự dừng); mô phỏng 2 người — người nộp sớm vào màn chờ, người còn lại làm tiếp và **được 3.33 điểm cho 1 câu làm đúng** thay vì 0; review có "Vì sao"; xác nhận thoát phòng; 4 viewport không tràn.
 - v5.7: 13 kỹ thuật Casio (cheat-sheet), 6 máy tính nâng cao đúng số liệu, giả lập 30 phím dựng được
   chuỗi bước và in màn hình; bản đồ 3 điểm 6,42/13,19 cM; không tràn ngang ở 4 kích thước.
+- v5.20: kiểm tra theo bài/chương/phần/chủ đề/toàn bộ, 5 dạng gồm tự luận, solo hoặc phòng 15 người; 4 game sảnh chờ chọn theo phòng; tài khoản có thẻ tiến độ; chat nổi chung/riêng/nhóm có sửa–thu hồi–tệp; sửa lỗi nút phồng trên máy cảm ứng; 12 view + 23 lab + đề 10.00 + 5 modal 0 exception; 4 viewport 0 tràn.
+- v5.19: mỗi bài thêm "nói thật chậm" + so sánh + 2 ý + 5 từ khoá + sơ đồ riêng; 58 thuật ngữ có chú giải tại chỗ; chế độ Học lại có next/prev và đánh dấu ngay trong hộp; 12 view + 23 lab + đề 10.00 + 5 modal 0 exception; 4 viewport 0 tràn.
+- v5.18: khóa lớp 10–11 (thẻ 🔒, ẩn tab, số liệu "—"); lớp 12 hợp nhất 3 tài liệu, 35 bài, 3 phần; tab Sơ đồ 9 SVG + 10 hình minh họa; chip "Đọc xong" tự kích hoạt khi cuộn hết bài và giữ sau reload; 12 view + 23 lab + đề 10.00 + 5 modal 0 exception; 4 viewport 0 tràn.
+- v5.17: tab Ôn 10–12 dựng đủ 35 bài lớp 12 + 13 chủ đề lớp 11 + 9 chủ đề lớp 10; 19 dòng công thức, 15 cặp dễ nhầm, 3 bảng đề thi; tìm "Hardy" ra đúng 1 bài và tự mở; đánh dấu đã học giữ sau reload; dock 12 tab 0 tràn ở 390/820/1366/1920; 12 view + 23 lab + đề 10.00 + 6 modal: 0 exception.
+- v5.16: 4 lỗi "chơi lại từ đầu" (DINO / MP start / NET start / Casio + thử thách lab) tái hiện rồi sửa; 23/23 lab động; 11 view + 6 modal + nến 0 exception; reload giữ `lab_explore`/`dino_best`; 4 viewport 0 tràn.
+- v5.15: 0 native `confirm()`; rời phòng hiện dialog → huỷ ở lại / xác nhận dọn sạch + toast; NET host với đối thủ im lặng ra **10.00** sau 12s; `gradeExam()` khi phòng đóng **không** ghi lịch sử / mở thành tích; toast icon SVG + chống trùng + tối đa 3; "Kiên trì" không mở khi sai hết; 23/23 cảnh 3D động; đề 18·4·6 = **10.00**; 11 view + 6 modal + nến: 0 exception; 4 viewport 390/820/1366/1920: 0 tràn, dialog vừa màn hình, dock 11 tab 0 tràn.
 - v5.14: 11 view + 23 lab + đề + 5 modal: 0 exception; nến chạy tiếp sau reload; mini nến hiện trên tab khác; dock 11 tab không tràn ở 390/820/1366/1920; 0 tràn ngang.
 - v5.13: 23/23 cảnh có chuyển động (bob/pulse/spin + hạt); tour 3D; 7 chuyên đề Hiểu sâu có sơ đồ; quick quiz 3 câu đúng chuyên đề; 0 exception; 4 viewport 0 tràn.
 - v5.12: 23/23 cảnh 3D dựng được (≥8 vật, ≥2 nhãn, 0 lỗi WebGL); xoay/zoom đổi góc; tài khoản A→B→A tách sạch cả khoá lớn trong IndexedDB (A='x', B='y'); sai PIN không vào được; chuỗi 35 ô; chat 2 tab gửi/nhận và chuỗi 1 ngày; 4 viewport 0 tràn; 0 exception.

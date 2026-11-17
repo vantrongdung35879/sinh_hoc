@@ -2,7 +2,7 @@
 
 Ứng dụng học tập Sinh học 12 chạy hoàn toàn trên trình duyệt (GitHub Pages), gồm **ứng dụng học sinh** (`sinh.html`), **bảng quản trị** (`admin.html`), **cổng vào** (`index.html`) và công cụ build icon (`_ins_sprite.js`).
 
-Phiên bản tài liệu: **v5.20** · Năm học: **2026–2027**.
+Phiên bản tài liệu: **v6.0** · Năm học: **2026–2027**.
 
 ---
 
@@ -159,6 +159,99 @@ có ô tìm kiếm toàn văn. Các câu phụ thuộc hình ảnh trong bản g
 - 10 view + 23 lab + mọi control + đề 18·4·6 + ngân hàng + 5 modal: **0 exception**.
 - 4 viewport 390/820/1366/1920: **0 tràn ngang**, modal Hiểu sâu vừa màn hình.
 - `sinh.html` 1633 KB (gzip **454 KB**) — tăng do thêm nội dung Hiểu sâu + hiệu ứng.
+
+## 3o. v6.0 — Hệ thống skin, ví xu, cửa hàng, nhiệm vụ + sửa lỗi nút phồng
+
+### 1. Tìm ra đúng nguyên nhân "nút phình to" (không phải đoán)
+Trong file có **hai** trình tạo gợn sóng cùng chạy khi bấm: `.bg4ripple` (v5.8b) và `.ripple` (v5.13).
+Quy tắc cũ `.btn>*{position:relative}` đứng sau `.bg4ripple` nhưng trước `.ripple`, nên với nút `inline-flex`,
+span gợn sóng bị đổi thành `position:relative` → trở thành **flex item**.
+Span đó có `width/height = max(w,h) × 1.7` (có lúc 200–400px) → **nút bị kéo phồng đúng bằng viên gợn trong 540ms** rồi co lại.
+Trên điện thoại, `:hover` dính sau khi chạm còn làm nút bị nhấc lên.
+
+Đã xử lý:
+- Gợn sóng bị đẩy khỏi luồng layout bằng `position:absolute!important` + `contain:strict` + `pointer-events:none`.
+- **Bỏ hẳn trình tạo gợn thứ hai** (một listener thay vì hai).
+- Mọi phản hồi thị giác chỉ dùng `transform`/`opacity`; hover chỉ bật trên `@media (hover:hover) and (pointer:fine)`.
+- Đo bằng CDP: nút `78×29` trước khi nhấn → `78×29` **trong khi** nhấn (có gợn) → `78×29` sau khi nhấn.
+
+### 2. Lỗi ẩn lớn: toàn bộ icon là ô rỗng
+Ứng dụng dùng `<i class="fa-solid fa-…">` nhưng **không hề nạp Font Awesome** (không `<link>`, không `@font-face`).
+Hệ thống `hydrateIcons` có sẵn chỉ thay được các tên có trong sprite; 29 tên còn lại bị xoá ruột và để lại khoảng trắng.
+Đã bổ sung bảng **alias + emoji fallback** ngay trong `iconNameOf`/`hydrateIcons`.
+Kết quả đo: **375 icon → 370 SVG + 5 emoji, 0 ô rỗng** (trước đó 9 icon trống, nhiều nút topbar không có biểu tượng).
+
+### 3. Hệ thống thiết kế (design system)
+- Token thống nhất: bán kính `8/10/13/18/24`, thang chuyển động `120/180/260ms`, `--ease-out`, chiều cao nút `34/29`.
+- Một lớp CSS cuối cùng khoá kích thước nút/chip/icon (33×33), focus ring, disabled, loading.
+- Đồng bộ thẻ, hero, tiêu đề mục, ô nhập, bảng, thanh cuộn, modal, dock.
+- Chuyển trang nhanh hơn: **0.42s → 0.26s**, chỉ `transform/opacity`.
+- `backdrop-filter` tự tắt trên màn hình ≤760px và ở chế độ đồ hoạ Lite (giảm tải GPU).
+
+### 4. 12 skin + hiệu ứng
+| Skin | Nền | Giá |
+|---|---|---|
+| Bio Aurora, Đại dương sâu | tối | miễn phí |
+| Thiên nhiên, Giấy học thuật, Anh đào, Glassmorphism | sáng | 240 / 280 / 380 / 460 |
+| Tím huyền ảo, Dark Premium, Hoàng hôn, Cyber Neon, Galaxy, Matrix | tối | 300 / 360 / 320 / 420 / 520 / 640 |
+
+- Mỗi skin có bảng màu cho **cả nền tối và nền sáng** (`html[data-skin][data-theme]`).
+- Toàn bộ màu nhấn cứng `rgba(61,220,151,…)` (116 chỗ), `rgba(56,189,248,…)` (49), `rgba(139,124,246,…)` (18)
+  đã chuyển sang `rgba(var(--accent-rgb),…)` → **mọi vệt sáng, viền, bóng đều đổi theo skin**.
+- 5 hiệu ứng nút (ánh quét, viền phát sáng, nhấc 3D, gợn nước, nhịp thở) + 3 hiệu ứng chuyển trang.
+- Áp skin trước khi CSS vẽ (script nhỏ ngay sau `<body>`) nên **không nháy màu** khi tải lại.
+- Xem trước trong modal, đổi nhanh bằng chấm màu ngay trong Cài đặt.
+
+### 5. Ví xu, cửa hàng, nhiệm vụ
+- **Kiếm xu**: đọc bài +4 (một lần/bài), hoàn thành bài +10, hoàn thành **cả chương** +40,
+  kiểm tra +8 (≥8.0 thêm +10, ≥9.5 thêm +6), hoạt động đầu tiên trong ngày +5, chuỗi 7 ngày +25,
+  quà chào mừng +120.
+- **5 nhiệm vụ ngày** (đọc 3 bài, học 2 bài, 1 bài kiểm tra, ≥8.0 điểm, giữ chuỗi) — 15/25/20/30/10 xu,
+  có thanh tiến trình, trạng thái và nút nhận; làm mới sau 00:00.
+- **Chống trừ tiền sai**: giao dịch chạy đồng bộ, khoá theo từng vật phẩm 420ms, sau khi mua id nằm trong `owned`
+  nên mọi lần bấm sau chỉ áp dụng. Đo: bấm 3 lần liên tiếp vào skin 420 xu → **trừ đúng 1 lần**.
+- **Dữ liệu**: `wallet` được chuẩn hoá (số dư không âm, mảng sai kiểu bị lọc, skin lạ rơi về mặc định),
+  lưu cùng tài khoản qua cơ chế snapshot sẵn có, có trong bản sao lưu JSON.
+- **Lịch sử**: 80 giao dịch gần nhất, hiển thị số dư / đã kiếm / đã dùng / bộ sưu tập.
+
+### 6. Giao diện điện thoại
+- Topbar 390px: ẩn nút toàn màn hình, ẩn phụ đề, thu gọn chip → **brand kết thúc 116px, chip bắt đầu 174px**, không chồng.
+- Dock 13 tab: cuộn ngang, mỗi tab 60px **vẫn hiện nhãn** (trước đây bóp còn 27px và mất chữ), tự cuộn tới tab đang mở.
+- Banner "No Key" từ thanh full-width phủ đáy → **thẻ nằm trong luồng trang** dưới topbar, có nút đóng.
+
+### 7. Kiểm chứng (CDP + Chrome 1366×900, 390×844, 820×1180, 1920×1080)
+- 13 view: **0 exception**; 4 kích thước: **0 tràn ngang**.
+- 5 loại nút: kích thước **không đổi** khi nhấn.
+- Mua skin, bấm liên tục, mua lại, thiếu xu, tải lại, đổi tài khoản A→B→A: số dư và skin **khôi phục đúng**.
+- Nhiệm vụ: nhận +15, nhận lần hai +0. Chương 1: 6 bài ×10 + 40 = **100 xu**, bỏ đánh dấu rồi bật lại **+0**.
+- 0 icon rỗng, 0 lỗi console.
+
+## 3n. v5.21 — Sửa lỗi chạm/nút phồng, giao diện điện thoại, 3D sáng và rõ hơn
+
+### 1. Vì sao bấm mãi không ăn
+- **Dock che nút cuối trang**: nội dung chỉ chừa 64px, nút nằm dưới dock. Tăng padding đáy lên `dock + 92px`; đo lại **0 nút bị che** trên điện thoại.
+- **Bong bóng chat đè nút**: hạ z-index xuống dưới modal (76/75), nâng bong bóng lên trên thanh lab.
+- **Banner hiệu năng che nút**: đổi từ thanh full-width thành thẻ nhỏ ở góc trên, có nút đóng, chỉ hiện khi cần.
+- **Nút phồng**: bỏ `button{min-height:38px}` toàn cục trên máy cảm ứng — nó kéo icon 33px thành 38px và làm chip/dock phồng. Đo lại: icon **33×33**, chip đọc **60×18**, dock **46px**.
+- Test chạm thật bằng CDP: tab Kiểm tra, nút Bắt đầu, nút Gửi chat, Copy mã phòng — **tất cả ăn ngay lần đầu**.
+
+### 2. Giao diện điện thoại
+- **Modal tạo phòng** từ 1407px → **713px**: bảng tùy chỉnh gập thành accordion, lưới người chơi 3 cột, ẩn nhãn HOST, game canvas thấp hơn, nút Bắt đầu luôn thấy.
+- **Modal chung** có `max-height:100dvh-24px` + cuộn trong, không còn tràn ra ngoài màn hình.
+- **Chat điện thoại** dùng `dvh`, chừa safe-area, panel 430px vừa màn hình, input và nút gửi luôn thấy.
+- Topbar 390px không chồng brand/chip; dock 12 tab vẫn 0 tràn.
+
+### 3. 3D sáng và rõ hơn
+- Tăng ambient + key light + fill + rim, giảm sương mù; camera **gần hơn 16%** để mô hình chiếm khung.
+- Nhãn bộ phận to hơn, có chân nối màu, ít đè lên mô hình.
+- **Phổi vẽ lại**: 2 thuỳ mỗi bên, rãnh gian thuỳ, phế quản chính + 3 nhánh, chùm phế nang dạng nho thay vì vòng xuyến.
+- Phòng kín thêm lá cho cây; tank trong game to hơn, robot rõ mắt hơn.
+
+### 4. Kiểm chứng
+- 12 view + 23 lab + đề 18·4·6 = **10.00** + 5 modal: **0 exception**.
+- 4 viewport 0 tràn; điện thoại 0 nút bị che; modal phòng 713px vừa 844px.
+- Chat gửi/sửa/thu hồi/nhóm/tệp/kéo/reload vẫn chạy; tài khoản hiện 4 ô tiến độ.
+- Quiz chương 1: 6 trắc nghiệm + 2 Đ/S + 2 ngắn, đúng chuyên đề.
 
 ## 3m. v5.20 — Kiểm tra theo phạm vi, 4 game sảnh chờ, tài khoản có tiến độ, chat nổi
 
@@ -581,6 +674,7 @@ Khi chưa có backend, các giới hạn ở mục 4 vẫn đúng: không phân 
 - v5.6: 10 chủ đề / 104 câu lớp 11; cấu hình mạng/tim/grace; mini-game khủng long (nhảy, mất mạng, chơi lại, tự dừng); mô phỏng 2 người — người nộp sớm vào màn chờ, người còn lại làm tiếp và **được 3.33 điểm cho 1 câu làm đúng** thay vì 0; review có "Vì sao"; xác nhận thoát phòng; 4 viewport không tràn.
 - v5.7: 13 kỹ thuật Casio (cheat-sheet), 6 máy tính nâng cao đúng số liệu, giả lập 30 phím dựng được
   chuỗi bước và in màn hình; bản đồ 3 điểm 6,42/13,19 cM; không tràn ngang ở 4 kích thước.
+- v5.21: sửa 0 nút bị dock/bong bóng che, nút không còn phồng, modal phòng 1407→713px, chat phone vừa màn hình, banner hiệu năng gọn, 3D sáng hơn + phổi vẽ lại; 12 view + 23 lab + đề 10.00 + 5 modal 0 exception; 4 viewport 0 tràn.
 - v5.20: kiểm tra theo bài/chương/phần/chủ đề/toàn bộ, 5 dạng gồm tự luận, solo hoặc phòng 15 người; 4 game sảnh chờ chọn theo phòng; tài khoản có thẻ tiến độ; chat nổi chung/riêng/nhóm có sửa–thu hồi–tệp; sửa lỗi nút phồng trên máy cảm ứng; 12 view + 23 lab + đề 10.00 + 5 modal 0 exception; 4 viewport 0 tràn.
 - v5.19: mỗi bài thêm "nói thật chậm" + so sánh + 2 ý + 5 từ khoá + sơ đồ riêng; 58 thuật ngữ có chú giải tại chỗ; chế độ Học lại có next/prev và đánh dấu ngay trong hộp; 12 view + 23 lab + đề 10.00 + 5 modal 0 exception; 4 viewport 0 tràn.
 - v5.18: khóa lớp 10–11 (thẻ 🔒, ẩn tab, số liệu "—"); lớp 12 hợp nhất 3 tài liệu, 35 bài, 3 phần; tab Sơ đồ 9 SVG + 10 hình minh họa; chip "Đọc xong" tự kích hoạt khi cuộn hết bài và giữ sau reload; 12 view + 23 lab + đề 10.00 + 5 modal 0 exception; 4 viewport 0 tràn.

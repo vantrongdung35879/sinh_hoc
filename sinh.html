@@ -3695,6 +3695,7 @@ select:focus-visible,input[type=text]:focus-visible,input[type=number]:focus-vis
         <div id="pfAvatar" style="width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:1.45rem;background:var(--surface2);border:1px solid var(--border);flex:0 0 auto">🧬</div>
         <div style="flex:1;min-width:0">
           <input type="text" id="pfName" maxlength="18" placeholder="Tên hiển thị" aria-label="Tên hiển thị">
+          <div id="pfTitle" style="margin-top:5px"></div>
         </div>
       </div>
       <div>
@@ -4280,6 +4281,7 @@ select:focus-visible,input[type=text]:focus-visible,input[type=number]:focus-vis
       <button data-st="skin" class="on" role="tab" onclick="BG4_SHOP.tab('skin')">🎨 Skin</button>
       <button data-st="fx" role="tab" onclick="BG4_SHOP.tab('fx')">✨ Hiệu ứng</button>
       <button data-st="quest" role="tab" onclick="BG4_SHOP.tab('quest')">🎯 Nhiệm vụ</button>
+      <button data-st="achv" role="tab" onclick="BG4_SHOP.tab('achv')">🏅 Thành tựu</button>
       <button data-st="wallet" role="tab" onclick="BG4_SHOP.tab('wallet')">🪙 Ví xu</button>
     </div>
 
@@ -5078,6 +5080,31 @@ const store = {
     }, 280);
   }
 };
+
+/* ---- Múi giờ Việt Nam (UTC+7) — dùng chung cho nhiệm vụ, chuỗi, SRS ----
+   Trả về ngày/tuần/tháng theo giờ VN bất kể múi giờ máy, để làm mới đúng 00:00 VN. */
+function bg4VNDate(dt) {
+  const x = dt ? new Date(dt) : new Date();
+  return new Date(x.getTime() + (x.getTimezoneOffset() + 420) * 60000);
+}
+function bg4VNDay(dt) {
+  const d = bg4VNDate(dt);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function bg4VNMonth(dt) { return bg4VNDay(dt).slice(0, 7); }
+function bg4VNWeek(dt) {
+  const d = bg4VNDate(dt);
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = (t.getUTCDay() + 6) % 7;            /* Thứ 2 = 0 */
+  t.setUTCDate(t.getUTCDate() - day + 3);          /* Thứ 5 của tuần ISO */
+  const y = t.getUTCFullYear();
+  const first = new Date(Date.UTC(y, 0, 4));
+  const fd = (first.getUTCDay() + 6) % 7;
+  first.setUTCDate(first.getUTCDate() - fd + 3);
+  const wk = 1 + Math.round((t - first) / 604800000);
+  return y + '-W' + String(wk).padStart(2, '0');
+}
+function bg4VNWeekday(dt) { return (bg4VNDate(dt).getDay() + 6) % 7; } /* 0=Thứ2 … 6=CN */
 
 /** API bất đồng bộ cho dữ liệu lớn (dùng khi cần đọc chắc chắn từ đĩa). */
 const BG4_STORE = {
@@ -12017,6 +12044,12 @@ const BG4_BACKUP = {
         streak: store.get('streak', null),
         syl_read: store.get('syl_read', null),
         syl_done: store.get('syl_done', null),
+        /* v6.1 — tiến độ học tập khác cũng phải nằm trong bản sao lưu */
+        flash_srs: store.get('flash_srs', null),
+        lab_explore: store.get('lab_explore', null),
+        lab_chal_done: store.get('lab_chal_done', null),
+        lab23_seen: store.get('lab23_seen', null),
+        achv_at: store.get('achv_at', null),
         settings: {
           theme: store.get('theme', 'dark'), size: store.get('size', 'md'),
           layout: store.get('layout', 'auto'), accent: store.get('accent', 'emerald'),
@@ -12076,6 +12109,18 @@ const BG4_BACKUP = {
     if (badH) warn.push('Bỏ qua ' + badH + ' bản ghi lịch sử lỗi.');
     if (dupB) warn.push('Bỏ qua ' + dupB + ' câu hỏi trùng.');
     if (badB) warn.push('Bỏ qua ' + badB + ' câu hỏi sai cấu trúc.');
+    /* v6.1 — FIX mất dữ liệu khi khôi phục: trước đây validate() KHÔNG trả về
+       wallet/quest/paid/streak/syl_read/syl_done… nên importData() đọc d[k] luôn
+       undefined → ví xu, nhiệm vụ, chuỗi ngày, tiến độ đọc bài bị âm thầm bỏ rơi.
+       Giờ chuyển tiếp các khối này (có kiểm tra kiểu) để khôi phục đầy đủ. */
+    const objPass = function (k) {
+      const v = d && d[k];
+      return (v && typeof v === 'object' && !Array.isArray(v)) ? v : null;
+    };
+    const arrPass = function (k, max) {
+      const v = d && d[k];
+      return (Array.isArray(v) && v.length <= max) ? v : null;
+    };
     return {
       ok: err.length === 0, errors: err, warnings: warn,
       counts: { history: goodHist.length, match: match.length, bank: goodBank.length,
@@ -12084,6 +12129,11 @@ const BG4_BACKUP = {
               progress4: prog, review4: rev, profile: prof,
               achv: Array.isArray(d && d.achv) ? d.achv : [],
               counters: (d && d.counters && typeof d.counters === 'object') ? d.counters : {},
+              wallet: objPass('wallet'), quest: objPass('quest'), paid: objPass('paid'),
+              streak: objPass('streak'), syl_read: objPass('syl_read'), syl_done: objPass('syl_done'),
+              flash_srs: objPass('flash_srs'), lab_explore: objPass('lab_explore'),
+              lab_chal_done: arrPass('lab_chal_done', 1000), lab23_seen: (d && Number.isFinite(+d.lab23_seen)) ? +d.lab23_seen : null,
+              achv_at: objPass('achv_at'),
               settings: (d && d.settings && typeof d.settings === 'object') ? d.settings : {} }
     };
   },
@@ -12158,9 +12208,11 @@ const BG4_BACKUP = {
       if (S[k] !== undefined) store.set(k, S[k]);
     });
     /* v6.0 — ví xu / skin / nhiệm vụ: khôi phục nếu bản sao lưu có */
-    ['wallet', 'quest', 'paid', 'streak', 'syl_read', 'syl_done'].forEach(function (k) {
+    ['wallet', 'quest', 'paid', 'streak', 'syl_read', 'syl_done', 'flash_srs', 'lab_explore', 'achv_at'].forEach(function (k) {
       if (d[k] && typeof d[k] === 'object') store.set(k, d[k]);
     });
+    if (Array.isArray(d.lab_chal_done)) store.set('lab_chal_done', d.lab_chal_done);
+    if (Number.isFinite(d.lab23_seen)) store.set('lab23_seen', d.lab23_seen);
     return v.counts;
   }
 };
@@ -12316,24 +12368,69 @@ const HISTORY = {
 /* ---------------------------------------------------------
    v2.0 · ACHIEVEMENTS
    --------------------------------------------------------- */
+/* Mỗi thành tựu: cond(S) tính từ trạng thái học thật (snapshot), reward nhận
+   MỘT lần khi mở khoá. Thành tựu không có cond chỉ mở qua sự kiện trực tiếp. */
 const ACHV = [
-  { id: 'first', ico: '🎯', n: 'Khởi động', d: 'Hoàn thành bài thi đầu tiên' },
-  { id: 'ten', ico: '🔟', n: 'Chiến binh', d: 'Hoàn thành 10 bài thi' },
-  { id: 'perfect', ico: '💎', n: 'Bất bại', d: 'Đạt 10.00 điểm' },
-  { id: 'streak', ico: '🔥', n: 'Kiên trì', d: 'Chuỗi 3 câu đúng liên tiếp' },
-  { id: 'vs1', ico: '⚔️', n: 'Đấu sĩ', d: 'Thắng một trận VS 2 người' },
-  { id: 'vs5', ico: '👑', n: 'Vô địch', d: 'Thắng 5 trận VS' },
-  { id: 'hpfull', ico: '❤️', n: 'Bất tử', d: 'Thắng VS mà không mất mạng' },
-  { id: 'laball', ico: '🧪', n: 'Phá đảo Lab', d: 'Mở đủ 23 thí nghiệm' },
-  { id: 'chal', ico: '🏅', n: 'Chinh phục', d: 'Hoàn thành 5 thử thách lab' },
-  { id: 'bank', ico: '🗂️', n: 'Nhà sưu tầm', d: 'Xem 100 câu trong ngân hàng' },
-  { id: 'night', ico: '🌙', n: 'Cú đêm', d: 'Học sau 23 giờ' },
-  { id: 'reader', ico: '📚', n: 'Nhà sinh học', d: 'Mở 20 chuyên đề lý thuyết' }
+  /* --- gốc (giữ id cũ, bổ sung điều kiện + thưởng) --- */
+  { id: 'first', ico: '🎯', n: 'Khởi động', d: 'Hoàn thành bài thi đầu tiên', reward: { c: 20 }, cond: function (S) { return S.exams >= 1; } },
+  { id: 'ten', ico: '🔟', n: 'Chiến binh', d: 'Hoàn thành 10 bài thi', reward: { c: 60 }, cond: function (S) { return S.exams >= 10; } },
+  { id: 'perfect', ico: '💎', n: 'Bất bại', d: 'Đạt 10.00 điểm', reward: { c: 80 }, cond: function (S) { return S.bestScore >= 9.995; } },
+  { id: 'streak', ico: '🔥', n: 'Kiên trì', d: 'Chuỗi 3 câu đúng liên tiếp', reward: { c: 25 } },
+  { id: 'vs1', ico: '⚔️', n: 'Đấu sĩ', d: 'Thắng một trận VS 2 người', reward: { c: 30 }, cond: function (S) { return S.vsWin >= 1; } },
+  { id: 'vs5', ico: '👑', n: 'Vô địch', d: 'Thắng 5 trận VS', reward: { c: 80, title: 'chien_than' }, cond: function (S) { return S.vsWin >= 5; } },
+  { id: 'hpfull', ico: '❤️', n: 'Bất tử', d: 'Thắng VS mà không mất mạng', reward: { c: 40 } },
+  { id: 'laball', ico: '🧪', n: 'Phá đảo Lab', d: 'Mở đủ 23 thí nghiệm', reward: { c: 100, title: 'nha_nghien_cuu' }, cond: function (S) { return S.labsSeen >= 23; } },
+  { id: 'chal', ico: '🏅', n: 'Chinh phục', d: 'Hoàn thành 5 thử thách lab', reward: { c: 50 }, cond: function (S) { return S.chal >= 5; } },
+  { id: 'bank', ico: '🗂️', n: 'Nhà sưu tầm', d: 'Xem 100 câu trong ngân hàng', reward: { c: 40 }, cond: function (S) { return S.bankSeen >= 100; } },
+  { id: 'night', ico: '🌙', n: 'Cú đêm', d: 'Học sau 23 giờ', reward: { c: 25, title: 'cu_dem' } },
+  { id: 'reader', ico: '📚', n: 'Nhà sinh học', d: 'Mở 20 chuyên đề lý thuyết', reward: { c: 40 }, cond: function (S) { return S.theoryOpen >= 20; } },
+  /* --- học bài / chương --- */
+  { id: 'begin', ico: '🌱', n: 'Người mới bắt đầu', d: 'Đọc xong bài học đầu tiên', reward: { c: 10 }, cond: function (S) { return S.sylRead >= 1; } },
+  { id: 'read10', ico: '📖', n: 'Mọt sách', d: 'Đọc xong 10 bài học', reward: { c: 30 }, cond: function (S) { return S.sylRead >= 10; } },
+  { id: 'learn5', ico: '✅', n: 'Chăm chỉ', d: 'Học xong 5 bài học', reward: { c: 30 }, cond: function (S) { return S.sylDone >= 5; } },
+  { id: 'learn15', ico: '📚', n: 'Bền bỉ', d: 'Học xong 15 bài học', reward: { c: 60 }, cond: function (S) { return S.sylDone >= 15; } },
+  { id: 'learnAll', ico: '🎓', n: 'Học giả toàn diện', d: 'Học xong toàn bộ bài trong giáo trình', reward: { c: 150, title: 'hoc_gia', frame: 'gold' }, cond: function (S) { return S.totalLessons > 0 && S.sylDone >= S.totalLessons; } },
+  { id: 'chap1', ico: '🧬', n: 'Khởi đầu chương', d: 'Hoàn thành trọn vẹn 1 chương', reward: { c: 40 }, cond: function (S) { return S.chapters >= 1; } },
+  { id: 'chap4', ico: '🧫', n: 'Nửa chặng đường', d: 'Hoàn thành 4 chương', reward: { c: 80 }, cond: function (S) { return S.chapters >= 4; } },
+  { id: 'chapAll', ico: '🏆', n: 'Chinh phục giáo trình', d: 'Hoàn thành cả 8 chương', reward: { c: 150, frame: 'elite' }, cond: function (S) { return S.chapters >= 8; } },
+  /* --- chuỗi ngày học --- */
+  { id: 'day7', ico: '🔥', n: 'Kiên trì 7 ngày', d: 'Giữ chuỗi học 7 ngày liên tiếp', reward: { c: 60, title: 'chamchi' }, cond: function (S) { return S.best >= 7; } },
+  { id: 'day14', ico: '⚡', n: 'Hai tuần rực lửa', d: 'Giữ chuỗi học 14 ngày', reward: { c: 100 }, cond: function (S) { return S.best >= 14; } },
+  { id: 'day30', ico: '👑', n: 'Chinh phục 30 ngày', d: 'Giữ chuỗi học 30 ngày', reward: { c: 200, title: 'tinh_hoa', frame: 'elite' }, cond: function (S) { return S.best >= 30; } },
+  /* --- trắc nghiệm / câu khó --- */
+  { id: 'quiz50', ico: '⚔️', n: 'Chiến thần trắc nghiệm', d: 'Trả lời đúng 50 câu trắc nghiệm', reward: { c: 80 }, cond: function (S) { return S.mcqOK >= 50; } },
+  { id: 'quiz200', ico: '🎯', n: 'Bậc thầy đáp án', d: 'Trả lời đúng 200 câu trắc nghiệm', reward: { c: 150, title: 'chien_than' }, cond: function (S) { return S.mcqOK >= 200; } },
+  { id: 'hard10', ico: '💪', n: 'Không ngại câu khó', d: 'Trả lời đúng 10 câu khó (vận dụng cao)', reward: { c: 50 }, cond: function (S) { return S.hardOK >= 10; } },
+  { id: 'hard50', ico: '🧗', n: 'Kẻ chinh phục câu khó', d: 'Trả lời đúng 50 câu khó', reward: { c: 120 }, cond: function (S) { return S.hardOK >= 50; } },
+  { id: 'score9', ico: '🌟', n: 'Điểm 9 rực rỡ', d: 'Đạt từ 9.0 điểm một bài thi', reward: { c: 60 }, cond: function (S) { return S.bestScore >= 9; } },
+  { id: 'exam25', ico: '🏅', n: 'Lão luyện phòng thi', d: 'Hoàn thành 25 bài thi', reward: { c: 100 }, cond: function (S) { return S.exams >= 25; } },
+  { id: 'exam50', ico: '🥇', n: 'Kỷ lục học tập', d: 'Hoàn thành 50 bài thi', reward: { c: 180, frame: 'gold' }, cond: function (S) { return S.exams >= 50; } },
+  /* --- bậc thầy chuyên đề Sinh học 12 --- */
+  { id: 'dtMaster', ico: '🧬', n: 'Bậc thầy di truyền phân tử', d: 'Thành thạo chuyên đề Di truyền phân tử (≥12 câu, đúng ≥80%)', reward: { c: 90 }, cond: function (S) { return !!S.master.dt; } },
+  { id: 'qlMaster', ico: '🧩', n: 'Bậc thầy quy luật di truyền', d: 'Thành thạo chuyên đề Quy luật di truyền', reward: { c: 90 }, cond: function (S) { return !!S.master.ql; } },
+  { id: 'nstMaster', ico: '🔬', n: 'Chuyên gia đột biến', d: 'Thành thạo chuyên đề NST & đột biến', reward: { c: 90 }, cond: function (S) { return !!S.master.nst; } },
+  { id: 'tvMaster', ico: '🌿', n: 'Bậc thầy sinh lý thực vật', d: 'Thành thạo chuyên đề Sinh lý thực vật', reward: { c: 90 }, cond: function (S) { return !!S.master.tv; } },
+  { id: 'dvMaster', ico: '🐾', n: 'Bậc thầy động vật & người', d: 'Thành thạo chuyên đề Động vật & người', reward: { c: 90 }, cond: function (S) { return !!S.master.dv; } },
+  { id: 'allTopics', ico: '🦠', n: 'Nhà Sinh học toàn năng', d: 'Thành thạo cả 7 chuyên đề', reward: { c: 200, frame: 'bio', title: 'hoc_gia' }, cond: function (S) { return S.topicsN > 0 && S.mastered >= S.topicsN; } },
+  /* --- flashcard / ghi nhớ --- */
+  { id: 'flash20', ico: '🃏', n: 'Trí nhớ tốt', d: 'Học 20 thẻ Flashcard', reward: { c: 30 }, cond: function (S) { return S.learned >= 20; } },
+  { id: 'flashM20', ico: '🧠', n: 'Thuộc làu', d: '20 thẻ đạt mức trưởng thành (nhớ dài hạn)', reward: { c: 80 }, cond: function (S) { return S.mature >= 20; } },
+  { id: 'flashM50', ico: '💡', n: 'Bậc thầy ghi nhớ', d: '50 thẻ đạt mức trưởng thành', reward: { c: 150, title: 'kip_no' }, cond: function (S) { return S.mature >= 50; } },
+  /* --- lab / thử thách --- */
+  { id: 'lab10', ico: '🔬', n: 'Nhà nghiên cứu Sinh học', d: 'Khám phá 10 thí nghiệm', reward: { c: 60 }, cond: function (S) { return S.labsSeen >= 10; } },
+  { id: 'chal15', ico: '🏹', n: 'Thợ săn thử thách', d: 'Hoàn thành 15 thử thách lab', reward: { c: 100 }, cond: function (S) { return S.chal >= 15; } },
+  /* --- nhiệm vụ / xu / sưu tầm --- */
+  { id: 'quest10', ico: '📋', n: 'Người làm nhiệm vụ', d: 'Nhận thưởng 10 nhiệm vụ', reward: { c: 40 }, cond: function (S) { return S.questClaim >= 10; } },
+  { id: 'quest50', ico: '🗂️', n: 'Bậc thầy nhiệm vụ', d: 'Nhận thưởng 50 nhiệm vụ', reward: { c: 120, title: 'kip_no' }, cond: function (S) { return S.questClaim >= 50; } },
+  { id: 'rich500', ico: '🪙', n: 'Nhà sưu tầm xu', d: 'Kiếm tổng cộng 500 xu', reward: { c: 50 }, cond: function (S) { return S.earned >= 500; } },
+  { id: 'rich2000', ico: '💰', n: 'Kho báu Sinh học', d: 'Kiếm tổng cộng 2000 xu', reward: { c: 150, frame: 'gold' }, cond: function (S) { return S.earned >= 2000; } },
+  { id: 'skin8', ico: '🎨', n: 'Tín đồ thời trang', d: 'Sở hữu 8 vật phẩm trở lên', reward: { c: 40 }, cond: function (S) { return S.skins >= 8; } }
 ];
 
 const ACH = {
   /* v5.15 — khoá lưu hỏng (null/object) từng làm toàn bộ thành tựu mất ổn định */
   got: (function () { try { const v = store.get('achv', []); return Array.isArray(v) ? v : []; } catch (e) { return []; } })(),
+  at: (function () { try { const v = store.get('achv_at', {}); return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {}; } catch (e) { return {}; } })(),
   counters: (function () {
     try {
       const v = store.get('counters', {});
@@ -12343,16 +12440,72 @@ const ACH = {
     } catch (e) { return { exams: 0, vsWin: 0, chal: 0, bankSeen: 0, theoryOpen: 0, labsSeen: [] }; }
   })(),
   has: function (id) { return this.got.indexOf(id) >= 0; },
-  unlock: function (id) {
-    if (this.has(id)) return;
+  /* Mở khoá 1 lần duy nhất: ghi ngày đạt + phát thưởng (đã chống trùng qua has()). */
+  unlock: function (id, quiet) {
+    if (this.has(id)) return false;
     const a = ACHV.filter(function (x) { return x.id === id; })[0];
-    if (!a) return;
+    if (!a) return false;
     this.got.push(id);
     try { store.set('achv', this.got); } catch (e) { }
+    try { this.at[id] = Date.now(); store.set('achv_at', this.at); } catch (e) { }
+    try { if (a.reward && window.BG4_REWARD) window.BG4_REWARD.grant(a.reward, 'Thành tích: ' + a.n); } catch (e) { }
     try { this.render(); } catch (e) { }
-    try { toast(a.ico, 'Mở khóa thành tích: ' + a.n, a.d, 4200); } catch (e) { }
-    try { confettiBurst(); } catch (e) { }
-    try { beep(920, 0.12); } catch (e) { }
+    if (!quiet) {
+      try { toast(a.ico, 'Mở khóa thành tích: ' + a.n, a.d, 4200); } catch (e) { }
+      try { confettiBurst(); } catch (e) { }
+      try { beep(920, 0.12); } catch (e) { }
+    }
+    return true;
+  },
+  /* Ảnh chụp trạng thái học thật — tính 1 lần cho cả đợt quét, tránh gọi lặp. */
+  snapshot: function () {
+    var S = { sylRead: 0, sylDone: 0, chapters: 0, totalLessons: 0, best: 0, cur: 0, bestScore: 0, exams: 0, mature: 0, learned: 0, flashTotal: 0, mastered: 0, topicsN: 0, master: {}, labsSeen: 0, chal: 0, mcqOK: 0, hardOK: 0, questClaim: 0, bankSeen: 0, theoryOpen: 0, vsWin: 0, bal: 0, earned: 0, skins: 0, titles: 0, frames: 0 };
+    try {
+      S.sylDone = Object.keys(SYL_DONE).filter(function (k) { return SYL_DONE[k]; }).length;
+      S.sylRead = Object.keys(SYL_READ).filter(function (k) { return SYL_READ[k]; }).length;
+      var ch = SYL_DATA[12].chapters;
+      for (var i = 0; i < ch.length; i++) {
+        S.totalLessons += ch[i].ls.length;
+        if (ch[i].ls.every(function (l) { return SYL_DONE[l.id]; })) S.chapters++;
+      }
+    } catch (e) { }
+    try { var st = BG4_STREAK.status(); S.best = st.best || 0; S.cur = st.cur || 0; } catch (e) { }
+    try { S.bestScore = HISTORY.stats().best || 0; S.exams = Math.max(HISTORY.list.length, this.counters.exams || 0); } catch (e) { }
+    try { var fs = FLASH.stats(); S.mature = fs.mature || 0; S.learned = fs.learned || 0; S.flashTotal = fs.total || 0; } catch (e) { }
+    try {
+      var keys = ['dt', 'dm', 'nst', 'ql', 'tv', 'dv', 'tb']; S.topicsN = keys.length;
+      for (var t = 0; t < keys.length; t++) {
+        var bt = PROG.d.byTopic[keys[t]]; if (!bt) continue;
+        var ok = 0, n = 0; for (var k in bt) { ok += bt[k].ok; n += bt[k].n; }
+        if (n >= 12 && ok / n >= 0.8) { S.master[keys[t]] = 1; S.mastered++; }
+      }
+    } catch (e) { }
+    try {
+      var c = this.counters;
+      S.labsSeen = (c.labsSeen || []).length; S.chal = c.chal || 0; S.mcqOK = c.mcqOK || 0; S.hardOK = c.hardOK || 0;
+      S.questClaim = c.questClaim || 0; S.bankSeen = c.bankSeen || 0; S.theoryOpen = c.theoryOpen || 0; S.vsWin = c.vsWin || 0;
+    } catch (e) { }
+    try { var w = window.BG4_WALLET.load(); S.bal = w.bal || 0; S.earned = w.earned || 0; S.skins = (w.owned || []).length; S.titles = (w.titles || []).length; S.frames = (w.frames || []).length; } catch (e) { }
+    return S;
+  },
+  /* Quét trung tâm: mở mọi thành tựu đủ điều kiện từ trạng thái thật.
+     Gom thông báo 1 lần để không dội toast khi quét hàng loạt lúc khởi động. */
+  check: function () {
+    var S; try { S = this.snapshot(); } catch (e) { return; }
+    if (!S) return;
+    var newly = [];
+    for (var i = 0; i < ACHV.length; i++) {
+      var a = ACHV[i];
+      if (!a.cond || this.has(a.id)) continue;
+      var ok = false; try { ok = !!a.cond(S); } catch (e) { ok = false; }
+      if (ok && this.unlock(a.id, true)) newly.push(a);
+    }
+    if (newly.length) {
+      try { toast('🏅', 'Mở khóa ' + newly.length + ' thành tích', newly.map(function (a) { return a.n; }).slice(0, 4).join(', ') + (newly.length > 4 ? '…' : ''), 4600); } catch (e) { }
+      try { confettiBurst(); } catch (e) { }
+      try { beep(920, 0.12); } catch (e) { }
+      try { if (window.BG4_SHOP && window.BG4_SHOP.cur === 'achv') window.BG4_SHOP.render(true); } catch (e) { }
+    }
   },
   bump: function (k, by) {
     this.counters[k] = (this.counters[k] || 0) + (by || 1);
@@ -12983,6 +13136,7 @@ function renderLabChal() {
     chalDone.push(labIdx);
     try { store.set('lab_chal_done', chalDone); } catch (e) { }
     ACH.bump('chal');
+    try { BG4_REWARD.labDone(labIdx); } catch (e) { }
     if (ACH.counters.chal >= 5) ACH.unlock('chal');
     confettiBurst();
     toast('🏅', 'Hoàn thành thử thách!', 'Thí nghiệm ' + (labIdx + 1) + ' — ' + LABS[labIdx].name, 3000);
@@ -15354,9 +15508,9 @@ const PROG = {
   },
   /** Đánh dấu có hoạt động trong ngày, cập nhật chuỗi ngày. */
   touch: function () {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = bg4VNDay();
     if (this.d.last === today) return;
-    const y = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const y = bg4VNDay(Date.now() - 86400000);
     this.d.streak = this.d.last === y ? (this.d.streak || 0) + 1 : 1;
     this.d.last = today;
     this.d.days = (this.d.days || []).concat(today).slice(-60);
@@ -15625,7 +15779,7 @@ const FLASH = {
     return out;
   },
 
-  today: function () { return new Date().toISOString().slice(0, 10); },
+  today: function () { return bg4VNDay(); },
   newUsed: function () { return this.meta.day === this.today() ? (this.meta.n || 0) : 0; },
   addNewUsed: function (n) {
     if (this.meta.day !== this.today()) this.meta = { day: this.today(), n: 0 };
@@ -15725,6 +15879,7 @@ const FLASH = {
     it.last = g;
     it.at = Date.now();
     store.set(this.key, this.srs);
+    try { BG4_REWARD.flashCard(c.k, g); } catch (e) { }
     beep(g === 0 ? 320 : 680, 0.035);
     this.idx++;
     this.flipped = false;
@@ -16112,6 +16267,7 @@ const DIAG = {
     this.checked = true;
     this.render();
     beep(ok === d.zones.length ? 880 : 420, 0.06);
+    if (ok === d.zones.length) { try { BG4_REWARD.diagramDone(this.idx); } catch (e) { } }
     return ok;
   },
 
@@ -16270,7 +16426,7 @@ function startReviewExam() {
   const list = shuffle(due.map(function (k) { return byStem[k]; }).filter(Boolean)).slice(0, 10);
   if (!list.length) { toast('✅', 'Không có câu đến hạn', 'Hộp ôn tập đang trống.', 2600); return; }
   const seed = (Math.random() * 4294967296) >>> 0;
-  exam = { mcq: materializeQuestions(list, seed), tf: [], short: [], seed: seed };
+  exam = { mcq: materializeQuestions(list, seed), tf: [], short: [], seed: seed, __review: true };
   answers = { mcq: {}, tf: {}, short: {} };
   totalTime = remain = 15 * 60;
   endAt = Date.now() + totalTime * 1000;
@@ -16630,6 +16786,7 @@ gradeExam = function (auto) {
     PROG.touch();
     renderPath();
     if (typeof renderBank === 'function') renderBank(true);
+    try { ACH.check(); } catch (e) { }
   } catch (e) { console.warn('[v4] record', e); }
   return r;
 };
@@ -22554,8 +22711,7 @@ const BG4_STREAK = {
     return this;
   },
   key: function (dt) {
-    const x = dt || new Date();
-    return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+    return bg4VNDay(dt);
   },
   mark: function (kind, n) {
     this.load();
@@ -22572,6 +22728,7 @@ const BG4_STREAK = {
     while (keys.length > 180) delete this.d.days[keys.shift()];
     store.set('streak', this.d);
     this.paint();
+    if (kind === 'min') { try { BG4_REWARD.minutes(v); } catch (e) { } }
     /* v6.0 — hoạt động đầu tiên trong ngày: +5 xu (một lần/ngày) */
     if (__newDay && (day.q || day.min || day.xp)) {
       try { BG4_REWARD.streak(this.d.cur); } catch (e) { }
@@ -28248,6 +28405,75 @@ html[data-theme="light"] .shop-bal{color:#a16207}
   .qrew .rw{font-size:.6rem}
 }
 
+/* dashboard nhiệm vụ / thành tựu */
+.qdash{display:flex;align-items:center;gap:14px;padding:13px;border-radius:15px;border:var(--line);
+  background:linear-gradient(135deg,rgba(var(--accent-rgb),.07),rgba(var(--accent2-rgb),.03));margin-bottom:12px}
+.qdash-ring{--p:0;position:relative;width:80px;height:80px;flex:0 0 auto;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  background:conic-gradient(var(--accent) calc(var(--p)*1%),rgba(128,140,160,.22) 0)}
+.qdash-ring::before{content:'';position:absolute;inset:7px;border-radius:50%;background:var(--surface)}
+.qdash-ring b,.qdash-ring span{position:relative;z-index:1}
+.qdash-ring b{font-size:.92rem;font-family:'JetBrains Mono',ui-monospace,monospace;line-height:1}
+.qdash-ring span{font-size:.47rem;color:var(--text3);text-transform:uppercase;letter-spacing:.03em;max-width:66px;text-align:center;line-height:1.15}
+.qdash-stats{flex:1;display:flex;gap:8px;min-width:0}
+.qd-stat{flex:1;text-align:center;padding:8px 4px;border-radius:11px;background:var(--surface);border:var(--line);min-width:0}
+.qd-stat b{display:block;font-size:1rem;font-family:'JetBrains Mono',ui-monospace,monospace;line-height:1.1}
+.qd-stat span{font-size:.5rem;color:var(--text3);text-transform:uppercase;letter-spacing:.02em}
+.qd-stat.ready b{color:var(--accent)}
+@media (max-width:420px){
+  .qdash{gap:10px;padding:10px}
+  .qdash-ring{width:64px;height:64px}
+  .qdash-ring::before{inset:6px}
+  .qdash-ring b{font-size:.76rem}
+  .qdash-ring span{font-size:.42rem;max-width:54px}
+  .qd-stat b{font-size:.85rem}
+}
+
+/* bộ lọc nhiệm vụ */
+.qfilters{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.qfilters::-webkit-scrollbar{height:4px}
+.qfilters::-webkit-scrollbar-thumb{background:var(--border2);border-radius:9px}
+.qfchip{flex:0 0 auto;padding:6px 11px;border-radius:99px;border:var(--line);background:var(--surface);
+  color:var(--text2);font-size:.64rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.16s var(--ease)}
+.qfchip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04140d;border-color:transparent}
+@media (hover:hover) and (pointer:fine){.qfchip:hover{border-color:var(--border2)}}
+
+/* nhãn cấp độ + meta + thưởng phụ */
+.qtier{display:inline-block;font-size:.5rem;font-weight:800;padding:1px 6px;border-radius:6px;vertical-align:middle;letter-spacing:.03em;text-transform:uppercase}
+.qtier.t1{background:rgba(61,220,151,.16);color:#3ddc97}
+.qtier.t2{background:rgba(56,189,248,.16);color:#38bdf8}
+.qtier.t3{background:rgba(251,191,36,.16);color:#fbbf24}
+.qtier.t4{background:rgba(244,114,182,.18);color:#f472b6}
+.qmeta{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-size:.55rem;color:var(--text3);font-weight:600}
+.qmeta span{white-space:nowrap}
+.rw-extra{font-size:.72rem;letter-spacing:1px}
+.qcard2.locked{opacity:.6}
+.qcard2.locked .qico{filter:grayscale(.5)}
+.qcard2.secret{border-style:dashed;border-color:var(--border2);background:var(--surface2)}
+.qcard2.secret .qico{background:linear-gradient(135deg,rgba(168,85,247,.18),rgba(244,114,182,.1));border-color:rgba(168,85,247,.3)}
+
+/* bộ sưu tập thành tựu */
+.achvgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(224px,1fr));gap:9px}
+@media (max-width:420px){.achvgrid{grid-template-columns:1fr}}
+.achvcard{display:flex;gap:10px;align-items:flex-start;padding:11px;border-radius:13px;border:var(--line);background:var(--surface);opacity:.55;transition:opacity .18s var(--ease),border-color .18s var(--ease)}
+.achvcard.on{opacity:1;border-color:rgba(var(--accent-rgb),.35);background:linear-gradient(135deg,rgba(var(--accent-rgb),.07),rgba(var(--accent2-rgb),.03))}
+.achv-ico{width:40px;height:40px;flex:0 0 auto;border-radius:12px;display:grid;place-items:center;font-size:1.3rem;line-height:1;background:var(--surface2);border:1px solid var(--border)}
+.achvcard.on .achv-ico{background:linear-gradient(135deg,rgba(var(--accent-rgb),.18),rgba(var(--accent2-rgb),.1));border-color:rgba(var(--accent-rgb),.3)}
+.achv-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.achv-body b{font-size:.74rem;line-height:1.25}
+.achv-body b+span{font-size:.6rem;color:var(--text3);line-height:1.4}
+.achv-date{font-size:.55rem;font-weight:700;color:var(--accent);margin-top:2px}
+.achv-date.lock{color:var(--text3);font-weight:600}
+.achv-rw{display:flex;gap:5px;align-items:center;margin-top:3px}
+.achv-rw .rw{font-size:.62rem;font-weight:800;color:#fbbf24}
+.achv-rw .rw-extra{font-size:.68rem}
+
+/* danh hiệu + khung avatar */
+.pf-title-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:800;padding:2px 9px;border-radius:99px;
+  background:linear-gradient(135deg,rgba(var(--accent-rgb),.16),rgba(var(--accent2-rgb),.1));border:1px solid rgba(var(--accent-rgb),.3);color:var(--text)}
+.frame-dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-2px;margin-right:3px;border:1px solid rgba(0,0,0,.25)}
+#pfAvatar{transition:box-shadow .2s var(--ease),border-color .2s var(--ease)}
+
 /* ví */
 .wallet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 .wstat{padding:11px 9px;border-radius:13px;border:var(--line);background:var(--surface);text-align:center}
@@ -28500,13 +28726,158 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
     { id: 'none', kind: 'tfx', name: 'Tắt chuyển cảnh', price: 0, demo: 'none', desc: 'Đổi trang tức thì. Nhanh nhất trên máy cấu hình thấp.' }
   ];
 
-  var QUESTS = [
-    { id: 'read', key: 'read', ico: '📖', name: 'Đọc 3 bài', sub: 'Đánh dấu "đọc xong" ở 3 bài khác nhau', target: 3, reward: 15 },
-    { id: 'learn', key: 'learn', ico: '✅', name: 'Học xong 2 bài', sub: 'Đánh dấu "đã học" ở 2 bài', target: 2, reward: 25 },
-    { id: 'quiz', key: 'quiz', ico: '🎯', name: 'Làm 1 bài kiểm tra', sub: 'Nộp bài ở Phòng thi hoặc mục Kiểm tra', target: 1, reward: 20 },
-    { id: 'score', key: 'score', ico: '⭐', name: 'Đạt từ 8.0 điểm', sub: 'Một bài kiểm tra bất kỳ', target: 1, reward: 30 },
-    { id: 'streak', key: 'streak', ico: '🔥', name: 'Học hôm nay', sub: 'Duy trì chuỗi ngày học', target: 1, reward: 10 }
+  /* ------------------------------------------------------------------ */
+  /* 1b. DANH HIỆU & KHUNG AVATAR (phần thưởng đặc biệt)                  */
+  /* ------------------------------------------------------------------ */
+  var TITLES = [
+    { id: 'chamchi', ico: '🌱', name: 'Chăm chỉ' },
+    { id: 'chien_than', ico: '⚡', name: 'Chiến thần trắc nghiệm' },
+    { id: 'hoc_gia', ico: '🎓', name: 'Học giả toàn diện' },
+    { id: 'cu_dem', ico: '🌙', name: 'Cú đêm' },
+    { id: 'tinh_hoa', ico: '👑', name: 'Tinh hoa' },
+    { id: 'nha_nghien_cuu', ico: '🔬', name: 'Nhà nghiên cứu' },
+    { id: 'kip_no', ico: '🚀', name: 'Kíp nổ' }
   ];
+  var FRAMES = [
+    { id: 'silver', name: 'Khung Bạc', ring: 'linear-gradient(135deg,#cbd5e1,#94a3b8)' },
+    { id: 'gold', name: 'Khung Vàng', ring: 'linear-gradient(135deg,#fde68a,#f59e0b)' },
+    { id: 'elite', name: 'Khung Tinh hoa', ring: 'linear-gradient(135deg,#a78bfa,#38bdf8,#f472b6)' },
+    { id: 'bio', name: 'Khung Sinh học', ring: 'linear-gradient(135deg,#3ddc97,#38bdf8)' }
+  ];
+  function titleOf(id) { return TITLES.filter(function (t) { return t.id === id; })[0] || null; }
+  function frameOf(id) { return FRAMES.filter(function (f) { return f.id === id; })[0] || null; }
+
+  /* ------------------------------------------------------------------ */
+  /* 1c. DANH MỤC NHIỆM VỤ v2                                            */
+  /*   scope: day|week|month|life — bucket theo dõi tiến độ              */
+  /*   metric: sự kiện đếm qua Q.track / trackMax                        */
+  /*   calc: tiến độ tính từ trạng thái học tập thật                     */
+  /*   tier: 1 dễ · 2 vừa · 3 khó · 4 đặc biệt                           */
+  /*   dedup: đếm theo khoá duy nhất trong kỳ (chống farm cùng bài)      */
+  /* ------------------------------------------------------------------ */
+  function sylDoneCount() { try { return Object.keys(SYL_DONE).filter(function (k) { return SYL_DONE[k]; }).length; } catch (e) { return 0; } }
+  function sylReadCount() { try { return Object.keys(SYL_READ).filter(function (k) { return SYL_READ[k]; }).length; } catch (e) { return 0; } }
+  function chapterDone(i) {
+    try {
+      var c = SYL_DATA[12].chapters[i]; if (!c) return 0;
+      var all = c.ls.every(function (l) { return SYL_DONE[l.id]; });
+      return all ? 1 : 0;
+    } catch (e) { return 0; }
+  }
+  function topicStat(t) {
+    try {
+      var bt = PROG.d.byTopic[t]; if (!bt) return { ok: 0, n: 0 };
+      var ok = 0, n = 0; for (var k in bt) { ok += bt[k].ok; n += bt[k].n; }
+      return { ok: ok, n: n };
+    } catch (e) { return { ok: 0, n: 0 }; }
+  }
+  function topicMaster(t) { var s = topicStat(t); return (s.n >= 12 && s.ok / s.n >= 0.8) ? 1 : 0; }
+  function streakBest() { try { return BG4_STREAK.status().best || 0; } catch (e) { return 0; } }
+  function streakCur() { try { return BG4_STREAK.status().cur || 0; } catch (e) { return 0; } }
+  function studiedToday() { try { var t = BG4_STREAK.status().today; return (t && (t.q || t.min || t.xp)) ? 1 : 0; } catch (e) { return 0; } }
+  function flashMature() { try { return FLASH.stats().mature || 0; } catch (e) { return 0; } }
+  function examCount() { try { return Math.max(HISTORY.list.length, (ACH.counters.exams || 0)); } catch (e) { return 0; } }
+  function randomTopic() {
+    var keys = ['dt', 'dm', 'nst', 'ql', 'tv', 'dv', 'tb'];
+    var d = bg4VNDay(), h = 0; for (var i = 0; i < d.length; i++) h = ((h << 5) - h + d.charCodeAt(i)) | 0;
+    return keys[Math.abs(h) % keys.length];
+  }
+  function dailyClaimedN() {
+    return QUESTS.filter(function (d) { return d.cat === 'daily' && d.id !== 'd_all' && Q.isClaimed(d); }).length;
+  }
+  function dailyTotalN() { return QUESTS.filter(function (d) { return d.cat === 'daily' && d.id !== 'd_all'; }).length; }
+  function weeklyClaimedN() {
+    return QUESTS.filter(function (d) { return d.cat === 'weekly' && d.id !== 'w_all' && Q.isClaimed(d); }).length;
+  }
+  function weeklyTotalN() { return QUESTS.filter(function (d) { return d.cat === 'weekly' && d.id !== 'w_all'; }).length; }
+
+  var QUESTS = [
+    /* ---- NHIỆM VỤ NGÀY ---- */
+    { id: 'd_read3', ico: '📖', name: 'Đọc 3 bài', sub: 'Đánh dấu "đọc xong" 3 bài khác nhau hôm nay', cat: 'daily', tier: 1, scope: 'day', metric: 'read', dedup: true, target: 3, reward: { c: 15 } },
+    { id: 'd_learn2', ico: '✅', name: 'Học xong 2 bài', sub: 'Đánh dấu "đã học" 2 bài hôm nay', cat: 'daily', tier: 1, scope: 'day', metric: 'learn', dedup: true, target: 2, reward: { c: 25 } },
+    { id: 'd_quiz1', ico: '🎯', name: 'Làm 1 bài kiểm tra', sub: 'Nộp bài ở Phòng thi hoặc Kiểm tra', cat: 'daily', tier: 1, scope: 'day', metric: 'quiz', target: 1, reward: { c: 20 } },
+    { id: 'd_score8', ico: '⭐', name: 'Đạt từ 8.0 điểm', sub: 'Một bài kiểm tra bất kỳ trong ngày', cat: 'daily', tier: 2, scope: 'day', metric: 'score8', target: 1, reward: { c: 30 } },
+    { id: 'd_flash10', ico: '🃏', name: 'Ôn 10 thẻ ghi nhớ', sub: 'Học 10 thẻ Flashcard khác nhau', cat: 'daily', tier: 1, scope: 'day', metric: 'flash', dedup: true, target: 10, reward: { c: 18 } },
+    { id: 'd_review5', ico: '🔁', name: 'Ôn 5 câu đến hạn', sub: 'Trả lời đúng 5 câu trong hộp ôn tập', cat: 'daily', tier: 2, scope: 'day', metric: 'review', target: 5, reward: { c: 22 } },
+    { id: 'd_min15', ico: '⏱️', name: 'Học 15 phút', sub: 'Tích luỹ 15 phút ở các tab học tập', cat: 'daily', tier: 1, scope: 'day', metric: 'minutes', target: 15, reward: { c: 15 } },
+    { id: 'd_streak', ico: '🔥', name: 'Học hôm nay', sub: 'Có ít nhất 1 hoạt động để giữ chuỗi', cat: 'daily', tier: 1, scope: 'day', calc: studiedToday, target: 1, reward: { c: 10 } },
+    { id: 'd_nohint', ico: '🙈', name: 'Thi không gợi ý', sub: 'Hoàn thành 1 đề chế độ Thi thật', cat: 'daily', tier: 2, scope: 'day', metric: 'nohint', target: 1, reward: { c: 26 } },
+    { id: 'd_improve', ico: '📈', name: 'Vượt chính mình', sub: 'Đạt điểm cao hơn kỷ lục trước đó', cat: 'daily', tier: 2, scope: 'day', metric: 'improve', target: 1, reward: { c: 28 } },
+    { id: 'd_random', ico: '🎲', name: 'Thử thách ngẫu nhiên', sub: 'Đúng 5 câu chuyên đề may mắn hôm nay', cat: 'daily', tier: 2, scope: 'day', calc: function () { return Q.bucketProg('day', 'topic_' + randomTopic()); }, target: 5, reward: { c: 24 } },
+    { id: 'd_all', ico: '🏆', name: 'Trọn vẹn ngày', sub: 'Nhận thưởng mọi nhiệm vụ ngày khác', cat: 'daily', tier: 3, scope: 'day', calc: dailyClaimedN, targetFn: dailyTotalN, reward: { c: 50, title: 'chamchi' } },
+
+    /* ---- NHIỆM VỤ TUẦN ---- */
+    { id: 'w_quiz5', ico: '🎯', name: 'Làm 5 bài kiểm tra', sub: 'Trong tuần này', cat: 'weekly', tier: 2, scope: 'week', metric: 'quiz', target: 5, reward: { c: 60 } },
+    { id: 'w_read10', ico: '📖', name: 'Đọc 10 bài', sub: '10 bài khác nhau trong tuần', cat: 'weekly', tier: 2, scope: 'week', metric: 'read', dedup: true, target: 10, reward: { c: 55 } },
+    { id: 'w_learn6', ico: '✅', name: 'Học xong 6 bài', sub: '6 bài khác nhau trong tuần', cat: 'weekly', tier: 2, scope: 'week', metric: 'learn', dedup: true, target: 6, reward: { c: 70 } },
+    { id: 'w_score9', ico: '🌟', name: 'Đạt 9.0 điểm', sub: 'Một bài kiểm tra trong tuần', cat: 'weekly', tier: 3, scope: 'week', metric: 'score9', target: 1, reward: { c: 80 } },
+    { id: 'w_flash40', ico: '🃏', name: 'Ôn 40 thẻ', sub: '40 thẻ Flashcard trong tuần', cat: 'weekly', tier: 2, scope: 'week', metric: 'flash', dedup: true, target: 40, reward: { c: 60 } },
+    { id: 'w_min90', ico: '⏱️', name: 'Học 90 phút', sub: 'Tích luỹ 90 phút trong tuần', cat: 'weekly', tier: 2, scope: 'week', metric: 'minutes', target: 90, reward: { c: 55 } },
+    { id: 'w_lab2', ico: '🧪', name: '2 thử thách Lab', sub: 'Hoàn thành thử thách 2 thí nghiệm', cat: 'weekly', tier: 2, scope: 'week', metric: 'lab', dedup: true, target: 2, reward: { c: 65 } },
+    { id: 'w_scoregoal', ico: '🎯', name: 'Mục tiêu điểm tuần', sub: 'Đạt ít nhất 8.5 điểm một lần', cat: 'weekly', tier: 3, scope: 'week', calc: function () { return Q.bucketProg('week', 'bestScore') >= 8.5 ? 1 : 0; }, target: 1, reward: { c: 90 } },
+    { id: 'w_all', ico: '🏆', name: 'Trọn vẹn tuần', sub: 'Nhận thưởng mọi nhiệm vụ tuần khác', cat: 'weekly', tier: 3, scope: 'week', calc: weeklyClaimedN, targetFn: weeklyTotalN, reward: { c: 120, frame: 'silver' } },
+
+    /* ---- NHIỆM VỤ THÁNG ---- */
+    { id: 'm_exam20', ico: '🎯', name: '20 bài kiểm tra', sub: 'Trong tháng này', cat: 'monthly', tier: 3, scope: 'month', metric: 'quiz', target: 20, reward: { c: 200 } },
+    { id: 'm_learn15', ico: '✅', name: 'Học 15 bài', sub: '15 bài khác nhau trong tháng', cat: 'monthly', tier: 3, scope: 'month', metric: 'learn', dedup: true, target: 15, reward: { c: 220 } },
+    { id: 'm_score9x3', ico: '💎', name: '3 lần đạt 9.0', sub: 'Ba bài kiểm tra ≥ 9.0 trong tháng', cat: 'monthly', tier: 3, scope: 'month', metric: 'score9', target: 3, reward: { c: 260 } },
+    { id: 'm_min300', ico: '⏱️', name: '300 phút học', sub: 'Tích luỹ 5 giờ học trong tháng', cat: 'monthly', tier: 3, scope: 'month', metric: 'minutes', target: 300, reward: { c: 200 } },
+    { id: 'm_flash120', ico: '🃏', name: '120 thẻ ghi nhớ', sub: '120 thẻ Flashcard trong tháng', cat: 'monthly', tier: 3, scope: 'month', metric: 'flash', dedup: true, target: 120, reward: { c: 240 } },
+
+    /* ---- NHIỆM VỤ CHƯƠNG (một lần) ---- */
+    { id: 'ch_c1', ico: '🧬', name: 'Chinh phục Chương 1', sub: 'Học xong mọi bài Di truyền phân tử', cat: 'chapter', tier: 2, scope: 'life', calc: function () { return chapterDone(0); }, target: 1, reward: { c: 50 } },
+    { id: 'ch_c2', ico: '🔬', name: 'Chinh phục Chương 2', sub: 'Học xong mọi bài Di truyền nhiễm sắc thể', cat: 'chapter', tier: 2, scope: 'life', calc: function () { return chapterDone(1); }, target: 1, reward: { c: 50 } },
+    { id: 'ch_c3', ico: '🧫', name: 'Chinh phục Chương 3', sub: 'Học xong mọi bài Mở rộng học thuyết di truyền NST', cat: 'chapter', tier: 2, scope: 'life', calc: function () { return chapterDone(2); }, target: 1, reward: { c: 50 } },
+    { id: 'ch_c4', ico: '🧮', name: 'Chinh phục Chương 4', sub: 'Học xong mọi bài Di truyền quần thể', cat: 'chapter', tier: 2, scope: 'life', calc: function () { return chapterDone(3); }, target: 1, reward: { c: 50 } },
+    { id: 'ch_c5', ico: '🦕', name: 'Chinh phục Chương 5', sub: 'Học xong mọi bài Bằng chứng & học thuyết tiến hóa', cat: 'chapter', tier: 2, scope: 'life', calc: function () { return chapterDone(4); }, target: 1, reward: { c: 50 } },
+    { id: 'ch_c6', ico: '🌍', name: 'Chinh phục Chương 6', sub: 'Học xong mọi bài Môi trường & sinh thái quần thể', cat: 'chapter', tier: 2, scope: 'life', calc: function () { return chapterDone(5); }, target: 1, reward: { c: 50 } },
+    { id: 'ch_c7', ico: '🦌', name: 'Chinh phục Chương 7', sub: 'Học xong mọi bài Sinh thái học quần xã', cat: 'chapter', tier: 2, scope: 'life', calc: function () { return chapterDone(6); }, target: 1, reward: { c: 50 } },
+    { id: 'ch_c8', ico: '♻️', name: 'Chinh phục Chương 8', sub: 'Học xong mọi bài Phục hồi, bảo tồn & phát triển bền vững', cat: 'chapter', tier: 2, scope: 'life', calc: function () { return chapterDone(7); }, target: 1, reward: { c: 50 } },
+
+    /* ---- NHIỆM VỤ CHUYÊN ĐỀ (thành thạo thật) ---- */
+    { id: 'tp_dt', ico: '🧬', name: 'Bậc thầy Di truyền phân tử', sub: '≥ 80% đúng (tối thiểu 12 câu) chuyên đề DNA', cat: 'topic', tier: 3, scope: 'life', calc: function () { return topicMaster('dt'); }, target: 1, reward: { c: 80 } },
+    { id: 'tp_ql', ico: '🧮', name: 'Bậc thầy Quy luật di truyền', sub: '≥ 80% đúng (tối thiểu 12 câu) Mendel', cat: 'topic', tier: 3, scope: 'life', calc: function () { return topicMaster('ql'); }, target: 1, reward: { c: 80 } },
+    { id: 'tp_nst', ico: '🔬', name: 'Bậc thầy NST & đột biến', sub: '≥ 80% đúng (tối thiểu 12 câu) NST', cat: 'topic', tier: 3, scope: 'life', calc: function () { return topicMaster('nst'); }, target: 1, reward: { c: 80 } },
+    { id: 'tp_tv', ico: '🌿', name: 'Bậc thầy Sinh lý thực vật', sub: '≥ 80% đúng (tối thiểu 12 câu) thực vật', cat: 'topic', tier: 3, scope: 'life', calc: function () { return topicMaster('tv'); }, target: 1, reward: { c: 80 } },
+    { id: 'tp_dv', ico: '🫀', name: 'Bậc thầy Động vật & người', sub: '≥ 80% đúng (tối thiểu 12 câu) động vật', cat: 'topic', tier: 3, scope: 'life', calc: function () { return topicMaster('dv'); }, target: 1, reward: { c: 80 } },
+
+    /* ---- THỬ THÁCH ---- */
+    { id: 'c_run5', ico: '⚡', name: 'Chuỗi 5 câu đúng', sub: '5 câu đúng liên tiếp trong một đề', cat: 'challenge', tier: 2, scope: 'life', metric: 'bestRun', target: 5, reward: { c: 40 } },
+    { id: 'c_run10', ico: '⚡', name: 'Chuỗi 10 câu đúng', sub: '10 câu đúng liên tiếp trong một đề', cat: 'challenge', tier: 3, scope: 'life', metric: 'bestRun', target: 10, reward: { c: 80 } },
+    { id: 'c_run20', ico: '🌩️', name: 'Chuỗi 20 câu đúng', sub: '20 câu đúng liên tiếp — không sai câu nào', cat: 'challenge', tier: 4, scope: 'life', metric: 'bestRun', target: 20, reward: { c: 160, title: 'chien_than' } },
+    { id: 'c_stage1', ico: '🥉', name: 'Khởi động · đạt 6.0', sub: 'Giai đoạn 1 của chuỗi thử thách điểm', cat: 'challenge', tier: 1, scope: 'life', metric: 'score6', target: 1, reward: { c: 20 } },
+    { id: 'c_stage2', ico: '🥈', name: 'Tăng tốc · đạt 8.0', sub: 'Giai đoạn 2 — mở sau khi qua Khởi động', cat: 'challenge', tier: 2, scope: 'life', metric: 'score8', target: 1, requires: 'c_stage1', reward: { c: 40 } },
+    { id: 'c_stage3', ico: '🥇', name: 'Đỉnh cao · đạt 9.5', sub: 'Giai đoạn 3 — mở sau khi qua Tăng tốc', cat: 'challenge', tier: 3, scope: 'life', metric: 'score95', target: 1, requires: 'c_stage2', reward: { c: 90, bfx: 'glow' } },
+    { id: 'c_diagram', ico: '🧩', name: 'Giải đúng 3 sơ đồ', sub: 'Hoàn thành cả 3 sơ đồ tương tác', cat: 'challenge', tier: 3, scope: 'life', metric: 'diagram', dedup: true, target: 3, reward: { c: 90 } },
+    { id: 'c_lab10', ico: '🧪', name: '10 thử thách Lab', sub: 'Hoàn thành thử thách 10 thí nghiệm', cat: 'challenge', tier: 3, scope: 'life', metric: 'lab', dedup: true, target: 10, reward: { c: 120, title: 'nha_nghien_cuu' } },
+
+    /* ---- CHUỖI NGÀY ---- */
+    { id: 's_7', ico: '🔥', name: 'Kiên trì 7 ngày', sub: 'Chuỗi học tập đạt 7 ngày', cat: 'streak', tier: 2, scope: 'life', calc: function () { return streakBest() >= 7 ? 1 : 0; }, target: 1, reward: { c: 60 } },
+    { id: 's_14', ico: '🔥', name: 'Bền bỉ 14 ngày', sub: 'Chuỗi học tập đạt 14 ngày', cat: 'streak', tier: 3, scope: 'life', calc: function () { return streakBest() >= 14 ? 1 : 0; }, target: 1, reward: { c: 120 } },
+    { id: 's_30', ico: '🌋', name: 'Chinh phục 30 ngày', sub: 'Chuỗi học tập đạt 30 ngày', cat: 'streak', tier: 4, scope: 'life', calc: function () { return streakBest() >= 30 ? 1 : 0; }, target: 1, reward: { c: 250, frame: 'gold' } },
+
+    /* ---- ĐƯỜNG DÀI ---- */
+    { id: 'l_read35', ico: '📚', name: 'Đọc hết 35 bài', sub: 'Đánh dấu đọc xong toàn bộ bài lớp 12', cat: 'life', tier: 3, scope: 'life', calc: function () { return sylReadCount() >= 35 ? 1 : 0; }, target: 1, reward: { c: 150 } },
+    { id: 'l_learn35', ico: '🎓', name: 'Học hết 35 bài', sub: 'Hoàn thành toàn bộ 35 bài lớp 12', cat: 'life', tier: 4, scope: 'life', calc: function () { return sylDoneCount() >= 35 ? 1 : 0; }, target: 1, reward: { c: 300, title: 'hoc_gia', skin: 'galaxy' } },
+    { id: 'l_exam50', ico: '🎯', name: '50 bài kiểm tra', sub: 'Tích luỹ 50 lần thi', cat: 'life', tier: 3, scope: 'life', calc: function () { return examCount() >= 50 ? 1 : 0; }, target: 1, reward: { c: 180 } },
+    { id: 'l_perfect', ico: '💎', name: 'Điểm 10 tuyệt đối', sub: 'Đạt 10.00 một bài kiểm tra', cat: 'life', tier: 4, scope: 'life', metric: 'perfect', target: 1, reward: { c: 200, title: 'tinh_hoa' } },
+    { id: 'l_flash50', ico: '🧠', name: '50 thẻ thành thạo', sub: '50 thẻ Flashcard đạt mức trưởng thành', cat: 'life', tier: 3, scope: 'life', calc: flashMature, target: 50, reward: { c: 150 } },
+
+    /* ---- ĐẶC BIỆT / BÍ MẬT ---- */
+    { id: 'sp_weekend', ico: '⚔️', name: 'Chiến binh cuối tuần', sub: 'Thi cuối tuần đạt ≥ 8.0 (chỉ T7–CN)', cat: 'special', tier: 3, scope: 'week', metric: 'weekendQuiz8', target: 1, weekend: true, reward: { c: 80 } },
+    { id: 'sp_night', ico: '🌙', name: 'Cú đêm', sub: 'Hoàn thành một đề sau 23 giờ', cat: 'special', tier: 3, scope: 'life', metric: 'nightQuiz', target: 1, hidden: true, reward: { c: 70, title: 'cu_dem' } },
+    { id: 'sp_comeback', ico: '🔄', name: 'Trở lại mạnh mẽ', sub: 'Học lại sau ≥ 3 ngày nghỉ', cat: 'special', tier: 2, scope: 'life', metric: 'comeback', target: 1, hidden: true, reward: { c: 60 } },
+    { id: 'sp_elite', ico: '👑', name: 'Tinh hoa', sub: 'Đạt 10.00 ở chế độ Thi thật, không gợi ý', cat: 'special', tier: 4, scope: 'life', metric: 'elite', target: 1, hidden: true, reward: { c: 300, frame: 'elite', skin: 'matrix' } }
+  ];
+  function questById(id) { return QUESTS.filter(function (x) { return x.id === id; })[0] || null; }
+  var CAT_META = {
+    daily: { n: 'Hôm nay', ico: '📅' }, weekly: { n: 'Tuần này', ico: '🗓️' },
+    monthly: { n: 'Tháng này', ico: '📆' }, chapter: { n: 'Theo chương', ico: '🧬' },
+    topic: { n: 'Chuyên đề', ico: '🎓' }, challenge: { n: 'Thử thách', ico: '⚡' },
+    streak: { n: 'Chuỗi ngày', ico: '🔥' }, life: { n: 'Đường dài', ico: '🏔️' },
+    special: { n: 'Đặc biệt', ico: '✨' }
+  };
+  var TIER_META = { 1: { n: 'Dễ', cls: 't1' }, 2: { n: 'Vừa', cls: 't2' }, 3: { n: 'Khó', cls: 't3' }, 4: { n: 'Đặc biệt', cls: 't4' } };
 
   var ALL = SKINS.map(function (s) { return { id: s.id, kind: 'skin', name: s.name, price: s.price }; })
     .concat(FXS.map(function (f) { return { id: f.id, kind: f.kind, name: f.name, price: f.price }; }));
@@ -28544,6 +28915,7 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
         v: 1, bal: 0, earned: 0, spent: 0,
         owned: ['default', 'sheen', 'fade', 'none'],
         skin: 'default', bfx: 'sheen', tfx: 'fade',
+        titles: [], frames: [], title: '', frame: '',
         hist: [], welcome: 0
       };
     },
@@ -28576,6 +28948,10 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
         if (typeof w.skin === 'string') d.skin = w.skin;
         if (typeof w.bfx === 'string') d.bfx = w.bfx;
         if (typeof w.tfx === 'string') d.tfx = w.tfx;
+        if (Array.isArray(w.titles)) d.titles = w.titles.filter(function (x) { return typeof x === 'string' && titleOf(x); });
+        if (Array.isArray(w.frames)) d.frames = w.frames.filter(function (x) { return typeof x === 'string' && frameOf(x); });
+        if (typeof w.title === 'string' && d.titles.indexOf(w.title) >= 0) d.title = w.title;
+        if (typeof w.frame === 'string' && d.frames.indexOf(w.frame) >= 0) d.frame = w.frame;
       }
       /* đồ mặc định luôn sở hữu, không bao giờ mất quyền dùng */
       ['default', 'sheen', 'fade', 'none'].forEach(function (id) {
@@ -28693,6 +29069,83 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
         root.dataset.bfx = d.bfx;
         root.dataset.tfx = d.tfx;
       } catch (e) { }
+      this.paintTitleFrame();
+    },
+
+    /* Áp danh hiệu + khung avatar lên hồ sơ và chip tài khoản. */
+    paintTitleFrame: function () {
+      var d = this.load();
+      try {
+        var av = document.getElementById('pfAvatar');
+        if (av) {
+          var f = frameOf(d.frame);
+          if (f) {
+            av.style.border = '2px solid transparent';
+            av.style.backgroundImage = f.ring;
+            av.style.backgroundOrigin = 'border-box';
+            av.style.boxShadow = 'inset 0 0 0 100px var(--surface2)';
+          } else {
+            av.style.border = '1px solid var(--border)';
+            av.style.backgroundImage = '';
+            av.style.backgroundOrigin = '';
+            av.style.boxShadow = '';
+          }
+          av.classList.toggle('has-frame', !!f);
+        }
+        var chipAv = document.getElementById('accChipAv');
+        if (chipAv) {
+          var cf = frameOf(d.frame);
+          chipAv.style.filter = cf ? 'drop-shadow(0 0 3px rgba(var(--accent-rgb),.9))' : '';
+        }
+        var t = titleOf(d.title);
+        var pf = document.getElementById('pfTitle');
+        if (pf) {
+          pf.innerHTML = t ? '<span class="pf-title-badge">' + t.ico + ' ' + esc(t.name) + '</span>' : '';
+        }
+        var chipName = document.getElementById('accChipName');
+        if (chipName) chipName.title = t ? ('Danh hiệu: ' + t.name) : 'Tài khoản trên máy';
+      } catch (e) { }
+    },
+
+    /* Cấp vật phẩm (skin/bfx) miễn phí từ phần thưởng — không trừ xu. */
+    grant: function (kind, id, label) {
+      var it = item(kind, id);
+      if (!it) return;
+      var d = this.load();
+      if (d.owned.indexOf(id) >= 0) return;
+      d.owned.push(id);
+      this.log('earn', 0, 'Mở khoá ' + it.name + ' (' + (label || 'thưởng') + ')');
+      this.save();
+      try { toast(kind === 'skin' ? '🎨' : '✨', 'Nhận vật phẩm', it.name + ' — ' + (label || 'phần thưởng'), 3600); } catch (e) { }
+      this.paint();
+    },
+    grantTitle: function (id, label) {
+      var t = titleOf(id); if (!t) return;
+      var d = this.load();
+      if (d.titles.indexOf(id) >= 0) return;
+      d.titles.push(id);
+      if (!d.title) d.title = id;
+      this.save(); this.paintTitleFrame();
+      try { toast(t.ico, 'Danh hiệu mới', t.name + ' — ' + (label || 'phần thưởng'), 3800); } catch (e) { }
+    },
+    grantFrame: function (id, label) {
+      var f = frameOf(id); if (!f) return;
+      var d = this.load();
+      if (d.frames.indexOf(id) >= 0) return;
+      d.frames.push(id);
+      if (!d.frame) d.frame = id;
+      this.save(); this.paintTitleFrame();
+      try { toast('🖼️', 'Khung avatar mới', f.name + ' — ' + (label || 'phần thưởng'), 3800); } catch (e) { }
+    },
+    equipTitle: function (id) {
+      var d = this.load();
+      d.title = (id && d.titles.indexOf(id) >= 0) ? id : '';
+      this.save(); this.paintTitleFrame(); SHOP.render(true);
+    },
+    equipFrame: function (id) {
+      var d = this.load();
+      d.frame = (id && d.frames.indexOf(id) >= 0) ? id : '';
+      this.save(); this.paintTitleFrame(); SHOP.render(true);
     },
 
     paint: function (bump) {
@@ -28783,64 +29236,204 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
   var Q = {
     K: 'quest',
     d: null,
-    today: function () {
-      var x = new Date();
-      return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+    today: function () { return bg4VNDay(); },
+
+    fresh: function (day, week, month) {
+      return {
+        v: 2, day: day, week: week, month: month,
+        buckets: { day: { prog: {}, uniq: {} }, week: { prog: {}, uniq: {} }, month: { prog: {}, uniq: {} }, life: { prog: {}, uniq: {} } },
+        claimed: {}, claimedEver: {}, notified: {}, pending: [], secret: {},
+        rewardLog: [], claimCount: 0
+      };
+    },
+    normBucket: function (b) {
+      if (!b || typeof b !== 'object') b = {};
+      if (!b.prog || typeof b.prog !== 'object') b.prog = {};
+      if (!b.uniq || typeof b.uniq !== 'object') b.uniq = {};
+      return b;
     },
     load: function () {
-      var t = this.today(), q = null;
+      var day = bg4VNDay(), week = bg4VNWeek(), month = bg4VNMonth(), q = null;
       try { q = store.get(this.K, null); } catch (e) { }
-      if (!q || typeof q !== 'object' || q.day !== t) {
-        q = { day: t, prog: {}, claimed: [], notified: [] };
-        try { store.set(this.K, q); } catch (e) { }
+      if (!q || typeof q !== 'object' || q.v !== 2) {
+        q = this.fresh(day, week, month);
+        this.d = q; this.save(); return q;
       }
-      if (!q.prog || typeof q.prog !== 'object') q.prog = {};
-      if (!Array.isArray(q.claimed)) q.claimed = [];
-      if (!Array.isArray(q.notified)) q.notified = [];
+      q.buckets = q.buckets || {};
+      q.buckets.day = this.normBucket(q.buckets.day);
+      q.buckets.week = this.normBucket(q.buckets.week);
+      q.buckets.month = this.normBucket(q.buckets.month);
+      q.buckets.life = this.normBucket(q.buckets.life);
+      if (!q.claimed || typeof q.claimed !== 'object') q.claimed = {};
+      if (!q.claimedEver || typeof q.claimedEver !== 'object') q.claimedEver = {};
+      if (!q.notified || typeof q.notified !== 'object') q.notified = {};
+      if (!Array.isArray(q.pending)) q.pending = [];
+      if (!q.secret || typeof q.secret !== 'object') q.secret = {};
+      if (!Array.isArray(q.rewardLog)) q.rewardLog = [];
+      q.claimCount = +q.claimCount || 0;
       this.d = q;
+      /* Sang kỳ: lưu nhiệm vụ đã xong-chưa nhận vào pending rồi mới reset bucket. */
+      var rolled = false;
+      if (q.day !== day) { this.archive('day', q.day); q.buckets.day = { prog: {}, uniq: {} }; q.day = day; rolled = true; }
+      if (q.week !== week) { this.archive('week', q.week); q.buckets.week = { prog: {}, uniq: {} }; q.week = week; rolled = true; }
+      if (q.month !== month) { this.archive('month', q.month); q.buckets.month = { prog: {}, uniq: {} }; q.month = month; rolled = true; }
+      if (rolled) this.save();
       return q;
     },
-    progress: function (def) {
-      var q = this.load();
-      return Math.min(def.target, Math.max(0, Math.floor(+q.prog[def.key] || 0)));
-    },
-    bump: function (key, n) {
-      var q = this.load();
-      q.prog[key] = Math.max(0, (+q.prog[key] || 0) + (n || 1));
-      try { store.set(this.K, q); } catch (e) { }
-      var self = this;
+    save: function () { try { store.set(this.K, this.d); } catch (e) { } },
+
+    archive: function (scope, oldPeriod) {
+      var q = this.d, self = this;
       QUESTS.forEach(function (def) {
-        if (def.key !== key) return;
-        if (q.prog[key] >= def.target && q.notified.indexOf(def.id) < 0 && q.claimed.indexOf(def.id) < 0) {
-          q.notified.push(def.id);
-          try { store.set(self.K, q); } catch (e) { }
-          try {
-            toast('🎯', 'Nhiệm vụ hoàn thành', '"' + def.name + '" — vào Cửa hàng nhận ' + def.reward + ' xu.', 4600);
-          } catch (e) { }
-          try { beep(900, .06); } catch (e) { }
+        if (def.scope !== scope || def.hidden) return;
+        if (self._claimed(def, oldPeriod)) return;
+        if (self._prog(def) >= self.target(def)) {
+          var rid = def.id + '@' + oldPeriod;
+          if (!q.pending.some(function (p) { return p.id === def.id && p.period === oldPeriod; })) {
+            q.pending.push({ id: def.id, period: oldPeriod, at: Date.now() });
+          }
         }
       });
-      if (SHOP.cur === 'quest') { try { SHOP.render(); } catch (e) { } }
+      if (q.pending.length > 40) q.pending = q.pending.slice(-40);
     },
-    claim: function (id) {
+
+    target: function (def) { try { return def.targetFn ? (+def.targetFn() || 0) : (+def.target || 0); } catch (e) { return +def.target || 0; } },
+    bucketProg: function (scope, metric) {
+      if (!this.d) this.load();
+      var b = this.d.buckets[scope]; return b ? (+b.prog[metric] || 0) : 0;
+    },
+    _prog: function (def) {
+      var p;
+      if (def.calc) { try { p = +def.calc() || 0; } catch (e) { p = 0; } }
+      else { p = this.bucketProg(def.scope, def.metric); }
+      return Math.max(0, Math.min(this.target(def), Math.floor(p)));
+    },
+    progress: function (def) { if (!this.d) this.load(); return this._prog(def); },
+    periodKey: function (scope) {
+      if (!this.d) this.load();
+      return scope === 'day' ? this.d.day : scope === 'week' ? this.d.week : scope === 'month' ? this.d.month : 'life';
+    },
+    rewardId: function (def) { return def.id + '@' + this.periodKey(def.scope); },
+    _claimed: function (def, period) {
+      var q = this.d;
+      if (def.scope === 'life') return !!q.claimedEver[def.id];
+      return !!q.claimed[def.id + '@' + (period || this.periodKey(def.scope))];
+    },
+    isClaimed: function (def) { if (!this.d) this.load(); return this._claimed(def); },
+    active: function (def) {
+      if (def.weekend && bg4VNWeekday() < 5) return false;
+      return true;
+    },
+    unlocked: function (def) { return !def.requires || this.isClaimed(questById(def.requires)); },
+
+    /* Đếm sự kiện có khoá duy nhất trong kỳ (chống farm cùng một bài). */
+    track: function (metric, n, key) {
       var q = this.load();
-      var def = QUESTS.filter(function (x) { return x.id === id; })[0];
+      n = (n == null ? 1 : +n) || 0;
+      if (n <= 0) return;
+      var self = this;
+      ['day', 'week', 'month', 'life'].forEach(function (sc) {
+        var b = q.buckets[sc];
+        if (key != null) {
+          var uk = metric + '|' + key;
+          if (b.uniq[uk]) return;
+          b.uniq[uk] = 1;
+        }
+        b.prog[metric] = (+b.prog[metric] || 0) + n;
+      });
+      this.save(); this.afterTrack();
+    },
+    /* Ghi nhận giá trị lớn nhất (chuỗi đúng, điểm cao nhất). */
+    trackMax: function (metric, val) {
+      var q = this.load(); val = +val || 0;
+      ['day', 'week', 'month', 'life'].forEach(function (sc) {
+        var b = q.buckets[sc];
+        if (val > (+b.prog[metric] || 0)) b.prog[metric] = val;
+      });
+      this.save(); this.afterTrack();
+    },
+    /* Tương thích ngược: vài luồng cũ gọi Q.bump. */
+    bump: function (metric, n) { this.track(metric, n); },
+
+    afterTrack: function () {
+      var q = this.d, self = this, changed = false;
+      QUESTS.forEach(function (def) {
+        if (def.hidden && !q.secret[def.id] && self._prog(def) > 0) {
+          q.secret[def.id] = 1; changed = true;
+          try { toast('🔮', 'Nhiệm vụ bí mật!', 'Bạn vừa phát hiện: ' + def.name, 4200); } catch (e) { }
+        }
+        if (self._claimed(def) || !self.unlocked(def) || !self.active(def)) return;
+        if (self._prog(def) >= self.target(def)) {
+          var rid = self.rewardId(def);
+          if (!q.notified[rid]) {
+            q.notified[rid] = 1; changed = true;
+            try { toast('🎯', 'Nhiệm vụ hoàn thành', '"' + def.name + '" — vào Cửa hàng nhận thưởng.', 4200); } catch (e) { }
+            try { beep(900, .06); } catch (e) { }
+          }
+        }
+      });
+      if (changed) this.save();
+      if (SHOP.cur === 'quest' || SHOP.cur === 'achv') { try { SHOP.render(true); } catch (e) { } }
+    },
+
+    claim: function (id, pendingPeriod) {
+      var q = this.load(), def = questById(id);
       if (!def) return;
-      if (q.claimed.indexOf(def.id) >= 0) {
-        try { toast('✓', 'Đã nhận rồi', 'Nhiệm vụ này đã được cộng xu hôm nay.', 2600); } catch (e) { }
-        return;
+      if (pendingPeriod) {
+        var prid = id + '@' + pendingPeriod;
+        if (q.claimed[prid] || q.claimedEver[id]) { try { toast('✓', 'Đã nhận rồi', 'Nhiệm vụ này đã được cộng thưởng.', 2400); } catch (e) { } return; }
+        q.claimed[prid] = Date.now();
+        if (def.scope === 'life') q.claimedEver[id] = Date.now();
+        q.pending = q.pending.filter(function (p) { return !(p.id === id && p.period === pendingPeriod); });
+        this.save(); this.pay(def, prid); return;
       }
-      if ((+q.prog[def.key] || 0) < def.target) {
-        try { toast('⏳', 'Chưa hoàn thành', def.sub, 2800); } catch (e) { }
-        return;
-      }
-      q.claimed.push(def.id);
-      try { store.set(this.K, q); } catch (e) { }
-      W.earn(def.reward, 'Nhiệm vụ: ' + def.name);
-      confetti(34);
-      SHOP.render();
+      if (this._claimed(def)) { try { toast('✓', 'Đã nhận rồi', 'Nhiệm vụ này đã được cộng thưởng kỳ này.', 2400); } catch (e) { } return; }
+      if (!this.unlocked(def)) { try { toast('🔒', 'Chưa mở khoá', 'Hoàn thành giai đoạn trước của chuỗi thử thách.', 2800); } catch (e) { } return; }
+      if (this._prog(def) < this.target(def)) { try { toast('⏳', 'Chưa hoàn thành', def.sub, 2800); } catch (e) { } return; }
+      var rid = this.rewardId(def);
+      q.claimed[rid] = Date.now();
+      if (def.scope === 'life') q.claimedEver[id] = Date.now();
+      this.save(); this.pay(def, rid);
+    },
+
+    pay: function (def, rid) {
+      var q = this.d, rw = def.reward || {};
+      if (rw.c) W.earn(rw.c, 'Nhiệm vụ: ' + def.name);
+      grantCosmetic(rw, 'Nhiệm vụ: ' + def.name);
+      q.rewardLog.unshift({ id: rid, q: def.id, c: rw.c || 0, t: Date.now() });
+      if (q.rewardLog.length > 60) q.rewardLog.length = 60;
+      q.claimCount = (+q.claimCount || 0) + 1;
+      this.save();
+      confetti(def.tier >= 3 ? 60 : 34);
+      try { ACH.bump('questClaim'); ACH.check(); } catch (e) { }
+      try { toast('🎁', 'Đã nhận thưởng', def.name + (rw.c ? ' · +' + rw.c + ' xu' : ''), 3600); } catch (e) { }
+      SHOP.render(true);
+    },
+
+    /* Tổng hợp cho dashboard */
+    summary: function () {
+      this.load();
+      var self = this, out = { daily: 0, dailyTotal: 0, ready: 0, pending: this.d.pending.length, claimCount: this.d.claimCount };
+      QUESTS.forEach(function (def) {
+        if (def.cat === 'daily' && def.id !== 'd_all') { out.dailyTotal++; if (self._claimed(def)) out.daily++; }
+        if (!def.hidden || self.d.secret[def.id]) {
+          if (!self._claimed(def) && self.unlocked(def) && self.active(def) && self._prog(def) >= self.target(def)) out.ready++;
+        }
+      });
+      return out;
     }
   };
+
+  /* Phần thưởng ngoài xu: skin / hiệu ứng nút / danh hiệu / khung avatar.
+     Mỗi loại đều kiểm tra "đã sở hữu" trước khi cấp → không cấp trùng. */
+  function grantCosmetic(rw, label) {
+    try {
+      if (rw.skin) W.grant('skin', rw.skin, label);
+      if (rw.bfx) W.grant('bfx', rw.bfx, label);
+      if (rw.title) W.grantTitle(rw.title, label);
+      if (rw.frame) W.grantFrame(rw.frame, label);
+    } catch (e) { }
+  }
 
   /* ------------------------------------------------------------------ */
   /* 4. CẦU NỐI THƯỞNG (được gọi từ các luồng học tập có sẵn)            */
@@ -28859,18 +29452,27 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
   function savePaid() { try { store.set('paid', { r: PAID.r, l: PAID.l, c: PAID.c }); } catch (e) { } }
 
   var R = {
+    /* Tiến độ nhiệm vụ đếm theo bài DUY NHẤT trong ngày (Q.track có dedup),
+       kể cả khi bài đã nhận xu trước đó → nhiệm vụ ngày luôn hoàn thành được.
+       Xu vẫn chỉ cộng MỘT lần duy nhất mỗi bài nhờ PAID (chống farm). */
     read: function (id) {
-      if (!id || PAID.r[id]) return;
-      PAID.r[id] = 1; savePaid();
-      W.earn(4, 'Đọc xong: ' + nameOfLesson(id));
-      Q.bump('read');
+      if (!id) return;
+      Q.track('read', 1, id);
+      if (!PAID.r[id]) {
+        PAID.r[id] = 1; savePaid();
+        W.earn(4, 'Đọc xong: ' + nameOfLesson(id));
+      }
+      try { ACH.check(); } catch (e) { }
     },
     learn: function (id) {
-      if (!id || PAID.l[id]) return;
-      PAID.l[id] = 1; savePaid();
-      W.earn(10, 'Hoàn thành: ' + nameOfLesson(id));
-      Q.bump('learn');
+      if (!id) return;
+      Q.track('learn', 1, id);
+      if (!PAID.l[id]) {
+        PAID.l[id] = 1; savePaid();
+        W.earn(10, 'Hoàn thành: ' + nameOfLesson(id));
+      }
       this.chapter(id);
+      try { ACH.check(); } catch (e) { }
     },
 
     /* Hoàn thành CẢ một chương (mọi bài đều đã đánh dấu học) → thưởng thêm */
@@ -28907,13 +29509,77 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
       if (score >= 8) n += 10;
       if (score >= 9.5) n += 6;
       W.earn(n, 'Kiểm tra ' + score.toFixed(2) + ' điểm');
-      Q.bump('quiz');
-      if (score >= 8) Q.bump('score');
+
+      Q.track('quiz', 1);
+      if (score >= 6) Q.track('score6', 1);
+      if (score >= 8) Q.track('score8', 1);
+      if (score >= 9) Q.track('score9', 1);
+      if (score >= 9.5) Q.track('score95', 1);
+      if (score >= 9.995) Q.track('perfect', 1);
+      Q.trackMax('bestScore', score);
+
+      /* Đếm câu đúng, chuỗi đúng dài nhất, câu khó, chuyên đề từ đáp án thật. */
+      var mcqOK = 0, hardOK = 0, run = 0, best = 0, reviewOK = 0;
+      try {
+        exam.mcq.forEach(function (q, i) {
+          var ok = ansCorrect(q, answers.mcq[i]);
+          if (ok) { mcqOK++; run++; if (run > best) best = run; Q.track('topic_' + q.t, 1); if ((q.d || 2) >= 3) hardOK++; if (exam.__review) reviewOK++; }
+          else run = 0;
+        });
+        exam.tf.forEach(function (q, i) {
+          q.sub.forEach(function (s, j) {
+            if (answers.tf[i + '_' + j] === s.ans) { run++; if (run > best) best = run; } else run = 0;
+          });
+        });
+        exam.short.forEach(function (q, i) {
+          if (normAns(answers.short[i]) !== '' && normAns(answers.short[i]) === normAns(q.ans)) { run++; if (run > best) best = run; } else run = 0;
+        });
+      } catch (e) { }
+      Q.trackMax('bestRun', best);
+      if (reviewOK) Q.track('review', reviewOK);
+      try { ACH.bump('mcqOK', mcqOK); ACH.bump('hardOK', hardOK); } catch (e) { }
+
+      var style = (typeof examStyle !== 'undefined') ? examStyle : 'real';
+      if (style !== 'practice') Q.track('nohint', 1);
+      try { var prevBest = HISTORY.stats().best; if (prevBest > 0 && score > prevBest) Q.track('improve', 1); } catch (e) { }
+      try {
+        var h = bg4VNDate().getHours();
+        if (h >= 23 || h < 4) Q.track('nightQuiz', 1);
+        var wd = bg4VNWeekday();
+        if ((wd === 5 || wd === 6) && score >= 8) Q.track('weekendQuiz8', 1);
+        if (score >= 9.995 && style !== 'practice') Q.track('elite', 1);
+      } catch (e) { }
+      try { ACH.check(); } catch (e) { }
     },
     streak: function (cur) {
       W.earn(5, 'Học hôm nay — giữ chuỗi', { silent: true });
-      Q.bump('streak');
       if (cur > 0 && cur % 7 === 0) W.earn(25, 'Chuỗi ' + cur + ' ngày liên tiếp');
+      /* Phát hiện "trở lại sau ≥3 ngày nghỉ" cho nhiệm vụ bí mật. */
+      try {
+        var days = BG4_STREAK.d.days, today = bg4VNDay(), prev = '';
+        for (var k in days) { var v = days[k]; if (k < today && v && (v.q || v.min || v.xp) && k > prev) prev = k; }
+        if (prev) {
+          var gap = Math.round((new Date(today) - new Date(prev)) / 86400000);
+          if (gap >= 3) Q.track('comeback', 1);
+        }
+      } catch (e) { }
+      try { ACH.check(); } catch (e) { }
+    },
+    /* Cầu nối cho các luồng học tập khác */
+    flashCard: function (cardKey, g) {
+      if (!cardKey) return;
+      Q.track('flash', 1, cardKey);
+      if (g >= 2) Q.track('flashGood', 1, cardKey);
+      try { ACH.check(); } catch (e) { }
+    },
+    labDone: function (idx) { Q.track('lab', 1, 'lab' + idx); try { ACH.check(); } catch (e) { } },
+    diagramDone: function (idx) { Q.track('diagram', 1, 'd' + idx); try { ACH.check(); } catch (e) { } },
+    minutes: function (n) { Q.track('minutes', n || 1); },
+    /* Thành tựu gọi để nhận thưởng (xu + vật phẩm), đã chống trùng ở ACH.unlock */
+    grant: function (rw, label) {
+      if (!rw) return;
+      if (rw.c) W.earn(rw.c, label || 'Thành tích');
+      grantCosmetic(rw, label || 'Thành tích');
     }
   };
 
@@ -28932,17 +29598,25 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
       this.render();
     },
 
-    render: function () {
+    render: function (keepScroll) {
       var body = document.getElementById('shopBody');
       if (!body) return;
+      /* Chỉ vẽ lại khi đang mở tab Cửa hàng. Sự kiện học nền (phút, thẻ, đọc bài)
+         không phải dựng lại cả danh sách nhiệm vụ/thành tựu khi tab đang ẩn.
+         go('shop') luôn gọi render() lúc mở nên nội dung không bao giờ cũ. */
+      var view = document.getElementById('view-shop');
+      if (view && !view.classList.contains('on')) return;
+      var sy = window.scrollY;
       var d = W.load();
       W.paint();
       var h = '';
       if (this.cur === 'fx') h = this.fx();
       else if (this.cur === 'quest') h = this.quests();
+      else if (this.cur === 'achv') h = this.achv();
       else if (this.cur === 'wallet') h = this.wallet();
       else h = this.skins();
       body.innerHTML = h;
+      if (keepScroll) window.scrollTo(0, sy);
     },
 
     /* ---------- skin ---------- */
@@ -29009,31 +29683,133 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
     },
 
     /* ---------- nhiệm vụ ---------- */
+    qFilter: 'all',
+    rewardHtml: function (rw) {
+      rw = rw || {};
+      var s = '';
+      if (rw.c) s += '<span class="rw">🪙 ' + rw.c + '</span>';
+      var extra = '';
+      if (rw.skin) { var sk = item('skin', rw.skin); if (sk) extra += '🎨'; }
+      if (rw.bfx) extra += '✨';
+      if (rw.title) { var t = titleOf(rw.title); if (t) extra += t.ico; }
+      if (rw.frame) extra += '🖼️';
+      if (extra) s += '<span class="rw-extra" title="Phần thưởng đặc biệt">' + extra + '</span>';
+      return s || '<span class="rw">🪙 0</span>';
+    },
+    periodLabel: function (def) {
+      if (def.weekend) return '⏳ Chỉ T7–CN';
+      if (def.scope === 'day') return '↻ 00:00';
+      if (def.scope === 'week') return '↻ cuối tuần';
+      if (def.scope === 'month') return '↻ cuối tháng';
+      return '∞ một lần';
+    },
+    qcard: function (def) {
+      var p = Q.progress(def), tg = Q.target(def);
+      var claimed = Q.isClaimed(def), unlocked = Q.unlocked(def), active = Q.active(def);
+      var done = p >= tg;
+      var pct = tg ? Math.min(100, Math.round(p / tg * 100)) : 0;
+      var tier = TIER_META[def.tier] || TIER_META[1];
+      var cls = claimed ? ' claimed' : (done && unlocked && active ? ' done' : (!unlocked ? ' locked' : ''));
+      var state;
+      if (claimed) state = '<span class="qstate">✓ Đã nhận</span>';
+      else if (!unlocked) state = '<span class="qstate wait">🔒 Khoá</span>';
+      else if (!active) state = '<span class="qstate wait">Cuối tuần</span>';
+      else if (done) state = '<button class="btn sm pri" data-act="claim" data-id="' + def.id + '">Nhận</button>';
+      else state = '<span class="qstate wait">' + p + '/' + tg + '</span>';
+      var reqNote = '';
+      if (def.requires && !unlocked) { var rq = questById(def.requires); reqNote = ' · cần "' + (rq ? rq.name : def.requires) + '"'; }
+      return '<div class="qcard2' + cls + '">' +
+        '<div class="qico">' + def.ico + '</div>' +
+        '<div class="qmain"><b>' + esc(def.name) + ' <span class="qtier ' + tier.cls + '">' + tier.n + '</span></b>' +
+        '<div class="qsub">' + esc(def.sub) + reqNote + '</div>' +
+        '<div class="qbar"><i style="width:' + pct + '%"></i></div>' +
+        '<div class="qmeta"><span>' + p + '/' + tg + '</span><span>' + this.periodLabel(def) + '</span></div></div>' +
+        '<div class="qrew">' + this.rewardHtml(def.reward) + state + '</div></div>';
+    },
     quests: function () {
-      var q = Q.load(), h = '';
-      var doneN = QUESTS.filter(function (d) { return q.claimed.indexOf(d.id) >= 0; }).length;
-      h += '<div class="shop-sec">Nhiệm vụ hôm nay <span>· ' + doneN + '/' + QUESTS.length +
-        ' đã nhận · làm mới sau 00:00</span></div>';
-      h += '<div class="qlist">';
-      QUESTS.forEach(function (def) {
-        var p = Q.progress(def);
-        var claimed = q.claimed.indexOf(def.id) >= 0;
-        var done = p >= def.target;
-        var pct = Math.round(p / def.target * 100);
-        h += '<div class="qcard2' + (claimed ? ' claimed' : done ? ' done' : '') + '">' +
-          '<div class="qico">' + def.ico + '</div>' +
-          '<div class="qmain"><b>' + esc(def.name) + '</b>' +
-          '<div class="qsub">' + p + '/' + def.target + ' · ' + esc(def.sub) + '</div>' +
-          '<div class="qbar"><i style="width:' + pct + '%"></i></div></div>' +
-          '<div class="qrew"><span class="rw">🪙 ' + def.reward + '</span>' +
-          (claimed ? '<span class="qstate">✓ Đã nhận</span>'
-            : done ? '<button class="btn sm pri" data-act="claim" data-id="' + def.id + '">Nhận</button>'
-              : '<span class="qstate wait">Chưa xong</span>') +
-          '</div></div>';
+      var q = Q.load(), self = this, h = '';
+      var sum = Q.summary();
+      var dayPct = sum.dailyTotal ? Math.round(sum.daily / sum.dailyTotal * 100) : 0;
+      h += '<div class="qdash">' +
+        '<div class="qdash-ring" style="--p:' + dayPct + '"><b>' + sum.daily + '/' + sum.dailyTotal + '</b><span>nhiệm vụ ngày</span></div>' +
+        '<div class="qdash-stats">' +
+        '<div class="qd-stat ready"><b>' + sum.ready + '</b><span>chờ nhận</span></div>' +
+        '<div class="qd-stat"><b>' + sum.pending + '</b><span>kỳ trước</span></div>' +
+        '<div class="qd-stat"><b>' + sum.claimCount + '</b><span>đã nhận tất cả</span></div>' +
+        '</div></div>';
+
+      /* Bộ lọc theo loại */
+      var cats = ['all', 'daily', 'weekly', 'monthly', 'chapter', 'topic', 'challenge', 'streak', 'life', 'special'];
+      h += '<div class="qfilters">';
+      cats.forEach(function (c) {
+        var lab = c === 'all' ? '🗂️ Tất cả' : (CAT_META[c].ico + ' ' + CAT_META[c].n);
+        h += '<button class="qfchip' + (self.qFilter === c ? ' on' : '') + '" data-act="qfilter" data-cat="' + c + '">' + lab + '</button>';
       });
       h += '</div>';
-      h += '<div class="tiny" style="margin-top:10px">Nhiệm vụ làm mới mỗi ngày. Ngoài ra bạn còn nhận xu trực tiếp khi ' +
-        'đọc bài (+4), hoàn thành bài (+10), làm kiểm tra (+8, thêm nếu điểm cao) và giữ chuỗi ngày (+5).</div>';
+
+      /* Nhiệm vụ kỳ trước đã xong nhưng chưa nhận */
+      if (q.pending.length) {
+        h += '<div class="shop-sec">⏳ Chờ nhận từ kỳ trước <span>· vẫn nhận được, không mất</span></div><div class="qlist">';
+        q.pending.forEach(function (p) {
+          var def = questById(p.id); if (!def) return;
+          h += '<div class="qcard2 done"><div class="qico">' + def.ico + '</div>' +
+            '<div class="qmain"><b>' + esc(def.name) + '</b><div class="qsub">Hoàn thành kỳ ' + esc(p.period) + ' — chưa nhận thưởng</div></div>' +
+            '<div class="qrew">' + self.rewardHtml(def.reward) +
+            '<button class="btn sm pri" data-act="claimPending" data-id="' + def.id + '" data-period="' + esc(p.period) + '">Nhận</button></div></div>';
+        });
+        h += '</div>';
+      }
+
+      /* Nhóm theo loại */
+      var order = ['daily', 'weekly', 'monthly', 'chapter', 'topic', 'challenge', 'streak', 'life', 'special'];
+      order.forEach(function (cat) {
+        if (self.qFilter !== 'all' && self.qFilter !== cat) return;
+        var list = QUESTS.filter(function (d) { return d.cat === cat; });
+        var visible = list.filter(function (d) { return !d.hidden || q.secret[d.id]; });
+        var hiddenN = list.length - visible.length;
+        if (!visible.length && !hiddenN) return;
+        var claimedN = visible.filter(function (d) { return Q.isClaimed(d); }).length;
+        h += '<div class="shop-sec">' + CAT_META[cat].ico + ' ' + CAT_META[cat].n +
+          ' <span>· ' + claimedN + '/' + visible.length + ' đã nhận</span></div><div class="qlist">';
+        visible.forEach(function (d) { h += self.qcard(d); });
+        if (hiddenN && (self.qFilter === 'all' || self.qFilter === 'special')) {
+          h += '<div class="qcard2 secret"><div class="qico">🔮</div>' +
+            '<div class="qmain"><b>Nhiệm vụ bí mật</b><div class="qsub">Còn ' + hiddenN + ' nhiệm vụ ẩn — tiếp tục học để khám phá.</div></div>' +
+            '<div class="qrew"><span class="qstate wait">???</span></div></div>';
+        }
+        h += '</div>';
+      });
+
+      h += '<div class="tiny" style="margin-top:12px;line-height:1.6">Nhiệm vụ ngày/tuần/tháng tự làm mới đúng 00:00 giờ Việt Nam. ' +
+        'Mỗi phần thưởng chỉ nhận một lần mỗi kỳ; nhiệm vụ đã xong nhưng chưa nhận được giữ lại sang kỳ sau. ' +
+        'Xu cũng cộng trực tiếp khi đọc bài (+4), học bài (+10), kiểm tra (+8, thêm nếu điểm cao) và giữ chuỗi (+5).</div>';
+      return h;
+    },
+
+    /* ---------- thành tựu / huy hiệu ---------- */
+    achv: function () {
+      var h = '', got = ACH.got.length, total = ACHV.length;
+      var pct = total ? Math.round(got / total * 100) : 0;
+      h += '<div class="qdash"><div class="qdash-ring" style="--p:' + pct + '"><b>' + got + '/' + total + '</b><span>thành tựu</span></div>' +
+        '<div class="qdash-stats"><div class="qd-stat"><b>' + pct + '%</b><span>hoàn thành</span></div>' +
+        '<div class="qd-stat"><b>' + (W.load().titles.length) + '</b><span>danh hiệu</span></div>' +
+        '<div class="qd-stat"><b>' + (W.load().frames.length) + '</b><span>khung</span></div></div></div>';
+      h += '<div class="shop-sec">🏅 Bộ sưu tập huy hiệu <span>· mở khoá bằng điều kiện thật</span></div>';
+      h += '<div class="achvgrid">';
+      var at = {}; try { at = store.get('achv_at', {}) || {}; } catch (e) { }
+      ACHV.forEach(function (a) {
+        var on = ACH.has(a.id);
+        var when = on && at[a.id] ? new Date(at[a.id]).toLocaleDateString('vi-VN') : '';
+        var rw = a.reward ? SHOP.rewardHtml(a.reward) : '';
+        h += '<div class="achvcard' + (on ? ' on' : '') + '">' +
+          '<div class="achv-ico">' + a.ico + '</div>' +
+          '<div class="achv-body"><b>' + esc(a.n) + '</b><span>' + esc(a.d) + '</span>' +
+          (on ? '<span class="achv-date">✓ ' + when + '</span>' : '<span class="achv-date lock">🔒 Chưa mở</span>') +
+          (rw ? '<span class="achv-rw">' + rw + '</span>' : '') + '</div></div>';
+      });
+      h += '</div>';
+      h += '<div class="tiny" style="margin-top:12px;line-height:1.6">Thành tựu chỉ mở khi đạt điều kiện thật, không mở trùng và không tự thưởng. ' +
+        'Mỗi thành tựu kèm phần thưởng riêng (xu / danh hiệu / khung). Xem danh hiệu & khung đã nhận ở tab Ví xu.</div>';
       return h;
     },
 
@@ -29076,7 +29852,33 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
         h += '<span class="chip' + (on ? ' on' : '') + '" style="cursor:default">✨ ' + esc(f.name) + '</span>';
       });
       h += '</div>';
-      h += '<div class="tiny" style="margin-top:12px;line-height:1.6">Toàn bộ xu, skin và lịch sử được lưu cùng tài khoản trên máy này. ' +
+
+      /* Danh hiệu & khung avatar nhận từ nhiệm vụ / thành tựu */
+      h += '<div class="shop-sec">🎖️ Danh hiệu <span>· bấm để đeo / gỡ</span></div>';
+      if (!d.titles.length) {
+        h += '<div class="tiny" style="color:var(--text3)">Chưa có danh hiệu. Hoàn thành nhiệm vụ đặc biệt hoặc thành tựu để nhận.</div>';
+      } else {
+        h += '<div class="wrap" style="gap:6px">';
+        h += '<button class="chip' + (!d.title ? ' on' : '') + '" data-act="equipTitle" data-id="">Không đeo</button>';
+        d.titles.forEach(function (id) {
+          var t = titleOf(id); if (!t) return;
+          h += '<button class="chip' + (d.title === id ? ' on' : '') + '" data-act="equipTitle" data-id="' + id + '">' + t.ico + ' ' + esc(t.name) + '</button>';
+        });
+        h += '</div>';
+      }
+      h += '<div class="shop-sec">🖼️ Khung avatar <span>· bấm để đeo / gỡ</span></div>';
+      if (!d.frames.length) {
+        h += '<div class="tiny" style="color:var(--text3)">Chưa có khung. Chuỗi 30 ngày, nhiệm vụ Tinh hoa… sẽ tặng khung.</div>';
+      } else {
+        h += '<div class="wrap" style="gap:6px">';
+        h += '<button class="chip' + (!d.frame ? ' on' : '') + '" data-act="equipFrame" data-id="">Không đeo</button>';
+        d.frames.forEach(function (id) {
+          var f = frameOf(id); if (!f) return;
+          h += '<button class="chip' + (d.frame === id ? ' on' : '') + '" data-act="equipFrame" data-id="' + id + '"><span class="frame-dot" style="background:' + f.ring + '"></span> ' + esc(f.name) + '</button>';
+        });
+        h += '</div>';
+      }
+      h += '<div class="tiny" style="margin-top:12px;line-height:1.6">Toàn bộ xu, skin, danh hiệu, khung và lịch sử được lưu cùng tài khoản trên máy này. ' +
         'Đổi tài khoản ở góc trên bên phải để dùng ví riêng cho từng người.</div>';
       return h;
     },
@@ -29174,6 +29976,10 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
       if (act === 'preview') SHOP.preview(b.getAttribute('data-id'));
       else if (act === 'act') SHOP.act(b.getAttribute('data-kind'), b.getAttribute('data-id'));
       else if (act === 'claim') Q.claim(b.getAttribute('data-id'));
+      else if (act === 'claimPending') Q.claim(b.getAttribute('data-id'), b.getAttribute('data-period'));
+      else if (act === 'qfilter') { SHOP.qFilter = b.getAttribute('data-cat'); SHOP.render(true); }
+      else if (act === 'equipTitle') W.equipTitle(b.getAttribute('data-id'));
+      else if (act === 'equipFrame') W.equipFrame(b.getAttribute('data-id'));
     });
   }
 
@@ -29198,6 +30004,8 @@ i.bg-emo{font-style:normal;line-height:1;display:inline-block;font-size:.96em;ve
     W.dom();
     W.paint();
     Q.load();
+    try { W.paintTitleFrame(); } catch (e) { }
+    try { ACH.check(); } catch (e) { }
     try { SHOP.paintSkinCard(); } catch (e) { }
     /* đồng bộ tab nếu người dùng đã đổi tab trước đó */
     var tabs = document.querySelectorAll('#shopTabs button');
